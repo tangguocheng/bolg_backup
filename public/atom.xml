@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.xn--4gqa63c686ta68iba.ren/"/>
-  <updated>2017-03-14T08:00:36.000Z</updated>
+  <updated>2017-04-06T08:25:55.187Z</updated>
   <id>http://www.xn--4gqa63c686ta68iba.ren/</id>
   
   <author>
@@ -14,6 +14,36 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>RTFSC uboot 之 宏</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2017/04/06/uboot_20170406/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2017/04/06/uboot_20170406/</id>
+    <published>2017-04-06T09:28:07.000Z</published>
+    <updated>2017-04-06T08:25:55.187Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h1 id="无副作用的-min-和-max-宏"><a href="#无副作用的-min-和-max-宏" class="headerlink" title="无副作用的 min 和 max 宏"></a>无副作用的 min 和 max 宏</h1><p>老的写法：<code>#define min_old(a,b) ((a &lt; b) ? a :b)</code></p>
+<p>linux 中使用GUN GCC的拓展语法 <code>typeof</code> 消除了参数为如 a++ 时的副作用。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">#define min_new(X, Y)				\</div><div class="line">	(&#123; typeof (X) __x = (X), __y = (Y);	\</div><div class="line">		(__x &lt; __y) ? __x : __y; &#125;)</div><div class="line"></div><div class="line">#define max_new(X, Y)				\</div><div class="line">	(&#123; typeof (X) __x = (X), __y = (Y);	\</div><div class="line">		(__x &gt; __y) ? __x : __y; &#125;)</div></pre></td></tr></table></figure>
+<h1 id="uboot-cmd命令"><a href="#uboot-cmd命令" class="headerlink" title="uboot cmd命令"></a>uboot cmd命令</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> Struct_Section  __attribute__ ((unused,section (<span class="meta-string">".u_boot_cmd"</span>)))</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span>  CFG_LONGHELP</span></div><div class="line">	<span class="meta">#<span class="meta-keyword">define</span> U_BOOT_CMD(name,maxargs,rep,cmd,usage,help) \</span></div><div class="line">	cmd_tbl_t __u_boot_cmd_##name Struct_Section = &#123;#name, maxargs, rep, cmd, usage, help&#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span>	<span class="comment">/* no long help info */</span></span></div><div class="line">	<span class="meta">#<span class="meta-keyword">define</span> U_BOOT_CMD(name,maxargs,rep,cmd,usage,help) \</span></div><div class="line">	cmd_tbl_t __u_boot_cmd_##name Struct_Section = &#123;#name, maxargs, rep, cmd, usage&#125;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span>	<span class="comment">/* CFG_LONGHELP */</span></span></div></pre></td></tr></table></figure>
+<p>u_boot_cmd 段在uboot的链接脚本中定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">. = .;</div><div class="line">__u_boot_cmd_start = .;</div><div class="line">.u_boot_cmd : &#123; *(.u_boot_cmd) &#125;</div><div class="line">__u_boot_cmd_end = .;</div></pre></td></tr></table></figure>
+<p>通过<code>U_BOOT_CMD</code>宏，将所有的命令导入到u_boot_cmd段中，在输入命令时，uboot在由<code>__u_boot_cmd_start</code><br>与 <code>__u_boot_cmd_end</code> 确定的范围内查找命令并执行。</p>
+<p>所有的命令原型为：<code>int (*cmd)(struct cmd_tbl_s *, int, int, char *[])</code>,定义在结构体<code>cmd_tbl_s</code>中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> cmd_tbl_s &#123;</div><div class="line">	<span class="keyword">char</span>		*name;		<span class="comment">/* Command Name			*/</span></div><div class="line">	<span class="keyword">int</span>		maxargs;	<span class="comment">/* maximum number of arguments	*/</span></div><div class="line">	<span class="keyword">int</span>		repeatable;	<span class="comment">/* autorepeat allowed?		*/</span></div><div class="line">					<span class="comment">/* Implementation function	*/</span></div><div class="line">	<span class="keyword">int</span>		(*cmd)(<span class="keyword">struct</span> cmd_tbl_s *, <span class="keyword">int</span>, <span class="keyword">int</span>, <span class="keyword">char</span> *[]);</div><div class="line">	<span class="keyword">char</span>		*usage;		<span class="comment">/* Usage message	(short)	*/</span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span>	CFG_LONGHELP</span></div><div class="line">	<span class="keyword">char</span>		*help;		<span class="comment">/* Help  message	(long)	*/</span></div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_AUTO_COMPLETE</span></div><div class="line">	<span class="comment">/* do auto completion on the arguments */</span></div><div class="line">	<span class="keyword">int</span>		(*complete)(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[], <span class="keyword">char</span> last_char, <span class="keyword">int</span> maxv, <span class="keyword">char</span> *cmdv[]);</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">&#125;;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h1 id=&quot;无副作用的-min-和-max-宏&quot;&gt;&lt;a href=&quot;#无副作用的-min-和-max-宏&quot; class=&quot;headerlink&quot; title=&quot;无副作用的 mi
+    
+    </summary>
+    
+      <category term="uboot" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/uboot/"/>
+    
+    
+      <category term="RTFSC uboot" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/RTFSC-uboot/"/>
+    
+  </entry>
   
   <entry>
     <title>STM32模拟I2C读取BQ34Z100</title>
@@ -789,52 +819,6 @@
     
     
       <category term="C 软件" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/C-%E8%BD%AF%E4%BB%B6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>升级助手上位机（使用C#编写）</title>
-    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/07/27/updateAssistant/"/>
-    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/07/27/updateAssistant/</id>
-    <published>2016-07-26T16:33:21.000Z</published>
-    <updated>2016-09-14T03:07:50.866Z</updated>
-    
-    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>bootloader写完之后，使用C#写了一个配套的升级助手。不得不说C#真的是一个很优秀的语言，而<strong>visual studio</strong>也完全可以称之为最强IDE，没有之一！配合<a href="https://msdn.microsoft.com/zh-cn/dn308572.aspx" target="_blank" rel="external">MSDN</a>，花了一个星期熟悉C#,然后两周不到完成了51升级助手的开发。</p>
-<h2 id="主界面"><a href="#主界面" class="headerlink" title="主界面"></a>主界面</h2><center><img src="http://o9kzgz0kz.bkt.clouddn.com/51bootloader.jpg" alt="51升级助手"></center>
-
-<blockquote>
-<p>特点:</p>
-<ol>
-<li>支持多种不同的通信协议（主要用于升级前的握手）<ul>
-<li>用户自定义协议</li>
-<li>IEC62056-21 C模式</li>
-<li>DL/T645-07</li>
-</ul>
-</li>
-<li>配合51bootloader完成用户代码的更新<ul>
-<li>支持原生Intel HEX-80格式</li>
-<li>支持设定用户代码段地址范围</li>
-<li>支持自动重发</li>
-<li>自动剔除全0xFF数据，减少发送数据量</li>
-</ul>
-</li>
-</ol>
-<p>使用到的功能模块:<br>1.串口通信(使用C#官方serialPort类库);<br>2.文件读写(使用C#官方File类库);<br>3.设置文件(使用xml保存);<br>4.定时器(用于通信时序控制);</p>
-</blockquote>
-<h2 id="整体思路"><a href="#整体思路" class="headerlink" title="整体思路"></a>整体思路</h2><p>首先上位机升级助手打开本地<code>hex</code>文件，对hex文件进行格式化，方便后面的数据传输。然后下位机在接收到升级指令后会判断是否符合升级条件，如果符合，则跳转到<code>bootloader</code>程序中准备接收升级数据，否则忽略升级指令，并返回响应帧通知上位机。<br>在升级的过程中，双方遵循同一个校验算法，下位机校验数据通过，通过<code>IAP</code>写入<code>flash</code>，否则请求重发。<br>下位机检测到处理到用户代码段的最后一帧数据，发送升级完成指令，下位机接收校验通过，通过长跳转指令调到用户代码，完成程序升级。<br>因为下位机<code>bootloader</code>采用查询的方式通信，为了提高可靠信，及降低出错时的重传代价，一次传输的代码字节限制在16个字节，所以需要格式化<code>hex-80</code>文件<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">bool</span> <span class="title">handleHexFile</span><span class="params">(<span class="built_in">string</span> filePath)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="built_in">string</span>[] Hex=System.IO.File.ReadAllLines(filePath);</div><div class="line">    <span class="built_in">string</span>[] formatHex= System.IO.File.ReadAllLines(Application.StartupPath + <span class="string">"\\tempHexFile.txt"</span>);</div><div class="line">    uint dateAddr = <span class="number">0</span>;</div><div class="line">    uint dateLen = <span class="number">0</span>;</div><div class="line">    foreach (<span class="built_in">string</span> hexLine in Hex)</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span> (!<span class="built_in">string</span>.IsNullOrEmpty(hexLine))</div><div class="line">        &#123;</div><div class="line">            <span class="keyword">if</span> (hexLine.Substring(<span class="number">0</span>, <span class="number">1</span>) == <span class="string">":"</span>)          <span class="comment">// hex-80文件以冒号":"开头</span></div><div class="line">            &#123;</div><div class="line">                dateLen = Convert.ToUInt32(hexLine.Substring(<span class="number">1</span>,<span class="number">2</span>).Trim(),<span class="number">16</span>);</div><div class="line">                dateAddr = Convert.ToUInt32(hexLine.Substring(<span class="number">3</span>, <span class="number">4</span>).Trim(),<span class="number">16</span>);</div><div class="line">                <span class="keyword">if</span> (dateLen == <span class="number">0</span>)</div><div class="line">                &#123;</div><div class="line">                    <span class="keyword">continue</span>;</div><div class="line">                &#125;</div><div class="line">                uint modLine = dateAddr / <span class="number">16</span>;</div><div class="line">                uint modByte = dateAddr % <span class="number">16</span> + <span class="number">1</span>;</div><div class="line">                uint modLen = dateLen;</div><div class="line">                <span class="built_in">string</span>[] tempStr=null;</div><div class="line">                tempStr = formatHex[modLine].Trim().Split(<span class="string">' '</span>);</div><div class="line">                </div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; modLen*<span class="number">2</span>; i+=<span class="number">2</span>)</div><div class="line">                &#123;</div><div class="line">                    tempStr[modByte] = hexLine.Substring(<span class="number">9</span> + i, <span class="number">2</span>).Trim();</div><div class="line">                    <span class="keyword">if</span> (modByte&gt;=<span class="number">16</span>)</div><div class="line">                    &#123;</div><div class="line">                        <span class="built_in">string</span> temp = null;</div><div class="line">                        <span class="keyword">for</span> (<span class="keyword">int</span> n = <span class="number">0</span>; n &lt; tempStr.Length; n++)</div><div class="line">                        &#123;</div><div class="line">                            temp += (tempStr[n].TrimStart() + <span class="string">' '</span>);</div><div class="line">                        &#125;</div><div class="line">                        formatHex[modLine] = temp;</div><div class="line">                       </div><div class="line">                        modByte = <span class="number">0</span>;</div><div class="line">                        modLine++;</div><div class="line">                        tempStr = formatHex[modLine].Trim().Split(<span class="string">' '</span>);</div><div class="line">                    &#125;</div><div class="line">                    modByte++;</div><div class="line">                &#125;</div><div class="line">                <span class="built_in">string</span> temp2 = null;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> n = <span class="number">0</span>; n &lt; tempStr.Length; n++)</div><div class="line">                &#123;</div><div class="line">                    temp2 += (tempStr[n].TrimStart() + <span class="string">' '</span>);</div><div class="line">                &#125;</div><div class="line">                formatHex[modLine] = temp2;</div><div class="line"></div><div class="line">            &#125;</div><div class="line">            <span class="keyword">else</span></div><div class="line">            &#123;</div><div class="line">                tbInformation.AppendText(<span class="string">"empty"</span>);</div><div class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;    </div><div class="line">    &#125;</div><div class="line">    updateFile = formatHex;</div><div class="line">    System.IO.File.WriteAllLines(Application.StartupPath + <span class="string">"\\HexFile.txt"</span>, formatHex);</div><div class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>除此之外，根据通信协议完成通讯部分的代码设计，一个可用的升级助手基本完成。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;bootloader写完之后，使用C#写了一个配套的升级助手。不得不说C#真的是一个很优秀的语言，而&lt;strong&gt;visual studio&lt;/strong&gt;也完全可以称之
-    
-    </summary>
-    
-      <category term="C#" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/C/"/>
-    
-    
-      <category term="C# 上位机 串口" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/C-%E4%B8%8A%E4%BD%8D%E6%9C%BA-%E4%B8%B2%E5%8F%A3/"/>
     
   </entry>
   
