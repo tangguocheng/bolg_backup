@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+		<title>中秋快乐</title>
+		<link rel="stylesheet"href="./css/myStyle.css"type="text/css"/>
+		<link rel="stylesheet"href="./vegas/vegas.min.css"type="text/css"/>
+		<link rel="stylesheet"href="./toast/toastr.min.css"type="text/css"/>
+		<link rel="stylesheet"href="./alert/sweetalert.css"type="text/css"/>
+		<link rel="stylesheet"href="./lightbox/css/lightbox.css"type="text/css"/>
+	</head>
+	<body id="viewContainer">
+		<audio id="audioBackground"autoplay="autoplay"volumevalue="0"loop>
+			<source src="http://obd6jz6in.bkt.clouddn.com/zhongqiu.mp3"type="audio/mp3"/>
+		</audio>
+		<div id="myMap">
+			<div id="imgGallery">
+				<ul class="polaroids">
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/huoqiu.jpg" data-lightbox="huoqiu" title="霍邱">
+							<img src="http://obd6jz6in.bkt.clouddn.com/huoqiu.jpg" alt="霍邱">
+						</a>
+					</li>
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/fuyang.jpg" data-lightbox="fuyang" title="阜阳">
+							<img src="http://obd6jz6in.bkt.clouddn.com/fuyang.jpg" alt="阜阳">
+						</a>
+					</li>
+					
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/maanshan.jpg" data-lightbox="maanshan" title="马鞍山">
+							<img src="http://obd6jz6in.bkt.clouddn.com/maanshan.jpg" alt="马鞍山">
+						</a>
+					</li>
+					
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/nanjing.jpg" data-lightbox="nanjin" title="南京">
+							<img src="http://obd6jz6in.bkt.clouddn.com/nanjing.jpg" alt="南京">
+						</a>
+					</li>
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/qingdao.jpg" data-lightbox="qingdao" title="青岛">
+							<img src="http://obd6jz6in.bkt.clouddn.com/qingdao.jpg" alt="青岛">
+						</a>
+					</li>
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/yangzhou.jpg" data-lightbox="yangzhou" title="扬州">
+							<img src="http://obd6jz6in.bkt.clouddn.com/yangzhou.jpg" alt="扬州">
+						</a>
+					</li>
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/hangzhou.jpg" data-lightbox="hangzhou" title="杭州">
+							<img src="http://obd6jz6in.bkt.clouddn.com/hangzhou.jpg" alt="杭州">
+						</a>
+					</li>
+					<li>
+						<a href="http://obd6jz6in.bkt.clouddn.com/shanghai.jpg" data-lightbox="shanghai" title="上海">
+							<img src="http://obd6jz6in.bkt.clouddn.com/shanghai.jpg" alt="上海">
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div id="imgDateBase" style="display:none"><!--  用作照片墙存储，不显示 -->
+			
+		</div>
+		<div id="cellPhone">看到这段信息时，说明你是用移动设备浏览的。<br/>因为移动端没有适配，显示效果较差，所以一些内容被屏蔽。请使用电脑端打开!
+			<br/><div id="countDown"><center>20 秒后自动关闭</center></div>
+		</div>
+	</body>
+	<script type="text/javascript"src="./vegas/jquery.min.js"></script>
+	<!-- 高德地图API -->
+	<script src="http://webapi.amap.com/maps?v=1.3&key=977c6cfb406e6c9ad826debfb6499bc3"type="text/javascript"></script>
+	<!-- 背景 -->
+	<script type="text/javascript"src="./vegas/vegas.min.js"></script>
+	<!-- 弹窗通知插件toastr -->
+	<script type="text/javascript"src="./toast/toastr.min.js"></script>
+	<!-- alert -->
+	<script type="text/javascript"src="./alert/sweetalert.min.js"></script>
+	<!-- lightBox -->
+	<script type="text/javascript"src="./lightbox/js/lightbox.js"></script>
+	<!-- 自定义 -->
+	<script type="text/javascript"src="./js/backgroud.js"></script>
+	<script type="text/javascript"src="./js/myJs.js"></script>
+</html>

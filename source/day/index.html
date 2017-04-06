@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在绞尽脑汁中</title>
+    <style type="text/css">
+        body {
+            background: url(http://cdn.abclocal.go.com/content/creativecontent/images/cms/1357537_1280x720.jpg) no-repeat center center fixed;
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+            background-repeat: no-repeat;
+            background-color: #614DB3;
+        }
+
+        .time-item strong {
+            background: #C71C60;
+            color: #fff;
+            line-height: 49px;
+            font-size: 36px;
+            font-family: Arial;
+            padding: 0 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .centerShow {
+
+            bottom: 0%;
+			   margin-left: auto;
+			   margin-right: auto;
+        }
+
+        .item-title .unit {
+            background: none;
+            line-height: 49px;
+            font-size: 24px;
+            padding: 0 10px;
+            float: left;
+        }
+    </style>
+    <script type="text/javascript" src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript">
+        function timer() {
+            window.setInterval(function() {
+                var minutes = 1000 * 60;
+                var hours = minutes * 60;
+                var days = hours * 24;
+                var currentDate = new Date();
+                var setDate = new Date();
+                setDate.setFullYear(2016, 8, 15);
+                setDate.setHours(0);
+                setDate.setMinutes(0);
+                setDate.setSeconds(0);
+                var tInterval = setDate.getTime() - currentDate.getTime();
+                var sDay = 0,
+                    sHour = 0,
+                    sMinute = 0,
+                    sSecond = 12;
+
+                if (tInterval < 0) // 如果上线日期是下个月
+                {
+                    return;
+                } else {
+                    sDay = Math.floor(tInterval / days);
+                    tInterval = tInterval % days;
+                    sHour = Math.floor(tInterval / hours);
+                    tInterval = tInterval % hours;
+                    sMinute = Math.floor(tInterval / minutes);
+                    tInterval = tInterval % minutes;
+                    sSecond = Math.floor(tInterval / 1000);
+                }
+                if (sMinute <= 9) sMinute = '0' + sMinute;
+                if (sSecond <= 9) sSecond = '0' + sSecond;
+                if (sHour <= 9) sHour = '0' + sHour;
+                if (sDay <= 9) sDay = '0' + sDay;
+                $('#day_show').html(sDay + "天");
+                $('#hour_show').html('<s id="h"></s>' + sHour + '时');
+                $('#minute_show').html('<s></s>' + sMinute + '分');
+                $('#second_show').html('<s></s>' + sSecond + '秒');
+            }, 1000);
+        }
+
+        $(function() {
+            timer();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="time-item centerShow">
+        <strong id="day_show">0天</strong>
+		<strong id="hour_show">0时</strong>
+		<strong id="minute_show">0分</strong>
+		<strong id="second_show">0秒</strong>
+    </div>
+    <!--倒计时模块-->
+
+</body>
+
+</html>
