@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>           
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/style.css" type="text/css" rel="stylesheet">
+<link rel="Shortcut Icon" href="img/index.png" type="image/x-icon">
+<!-- <link href="css/css.css"  rel="stylesheet" type="text/css" /> -->
+<!--给我最爱的你 -->
+<title>you are my little star</title>
+<style>
+body {
+  background: #060e1b;
+  overflow: hidden;
+}
+
+canvas {
+  opacity: 1.0;
+}
+
+</style>
+</head>
+<body>
+
+<audio autoplay="autoplay" loop>
+      <source src="http://obd6jz6in.bkt.clouddn.com/twinkle.mp3" type="audio/mp3" />
+</audio>
+
+<div class="container" id= "jin">
+  <img src="http://obd6jz6in.bkt.clouddn.com/1.jpg" title="接下来的奋斗目标！！" class="pic1"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/2.jpg" title="笑靥如花&#10容颜似水"  class="pic2"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/3.jpg" title="若不是你&#10那天的西湖怎么会这么美"  class="pic3"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/4.jpg" title="宝宝&#10六一快乐！"  class="pic4"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/5.jpg" title="二如脱兔&#10静若女神"  class="pic5"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/11.jpg" title="夫妻相？"  class="pic11"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/6.jpg" title="我还是觉得你二的时候最美怎么办！！"  class="pic6"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/7.jpg" title="you are my shushine"  class="pic7"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/8.jpg" title="在青岛出差&#10真的好想你"  class="pic8"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/9.jpg" title="四年、八年&#10接下来我想和你八十年^_^"  class="pic9"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/10.jpg" title="对我来说&#10所有的景区&#10你才是最美的风景"  class="pic10"  />
+  <img src="http://obd6jz6in.bkt.clouddn.com/12.jpg" title="告诉你个秘密&#10我的眼睛里有PhotoShop" class="pic12"  />
+</div>
+
+<canvas id="canvas"></canvas>
+<script>
+"use strict";
+var canvas = document.getElementById('canvas'),
+  ctx = canvas.getContext('2d'),
+  w = canvas.width = window.innerWidth+10,
+  h = canvas.height = window.innerHeight+20,
+
+  hue = 217,
+  stars = [],
+  count = 0,
+  maxStars = 1600;
+
+var canvas2 = document.createElement('canvas'),
+  ctx2 = canvas2.getContext('2d');
+canvas2.width = 100;
+canvas2.height = 100;
+var half = canvas2.width / 2,
+  gradient2 = ctx2.createRadialGradient(half, half, 0, half, half, half);
+gradient2.addColorStop(0.025, '#fff');
+gradient2.addColorStop(0.1, 'hsl(' + hue + ', 61%, 33%)');
+gradient2.addColorStop(0.25, 'hsl(' + hue + ', 64%, 6%)');
+gradient2.addColorStop(1, 'transparent');
+
+ctx2.fillStyle = gradient2;
+ctx2.beginPath();
+ctx2.arc(half, half, half, 0, Math.PI * 2);
+ctx2.fill();
+
+function random(min, max) {
+  if (arguments.length < 2) {
+    max = min;
+    min = 0;
+  }
+
+  if (min > max) {
+    var hold = max;
+    max = min;
+    min = hold;
+  }
+
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function maxOrbit(x, y) {
+  var max = Math.max(x, y),
+    diameter = Math.round(Math.sqrt(max * max + max * max));
+  return diameter / 2;
+}
+
+var Star = function() {
+
+  this.orbitRadius = random(maxOrbit(w, h));
+  this.radius = random(60, this.orbitRadius) / 12;
+  this.orbitX = w / 2;
+  this.orbitY = h / 2;
+  this.timePassed = random(0, maxStars);
+  this.speed = random(this.orbitRadius) / 900000;
+  this.alpha = random(2, 10) / 10;
+
+  count++;
+  stars[count] = this;
+}
+
+Star.prototype.draw = function() {
+  var x = Math.sin(this.timePassed) * this.orbitRadius + this.orbitX,
+    y = Math.cos(this.timePassed) * this.orbitRadius + this.orbitY,
+    twinkle = random(10);
+
+  if (twinkle === 1 && this.alpha > 0) {
+    this.alpha -= 0.05;
+  } else if (twinkle === 2 && this.alpha < 1) {
+    this.alpha += 0.05;
+  }
+
+  ctx.globalAlpha = this.alpha;
+  ctx.drawImage(canvas2, x - this.radius / 2, y - this.radius / 2, this.radius, this.radius);
+  this.timePassed += this.speed;
+}
+
+for (var i = 0; i < maxStars; i++) {
+  new Star();
+}
+
+function animation() {
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.8;
+  ctx.fillStyle = 'hsla(' + hue + ', 64%, 6%, 1)';
+  ctx.fillRect(0, 0, w, h)
+
+  ctx.globalCompositeOperation = 'lighter';
+  for (var i = 1, l = stars.length; i < l; i++) {
+    stars[i].draw();
+  };
+
+  window.requestAnimationFrame(animation);
+}
+animation();
+animation();
+</script>
+<script type="text/javascript">
+    var winWidth = 0;
+    var winHeight = 0;
+    function findDimensions() 
+    {
+    if (window.innerWidth)
+      winWidth = window.innerWidth;
+    else if ((document.body) && (document.body.clientWidth))
+      winWidth = document.body.clientWidth;
+
+    if (window.innerHeight)
+      winHeight = window.innerHeight;
+    else if ((document.body) && (document.body.clientHeight))
+      winHeight = document.body.clientHeight;
+
+    if (document.documentElement  && document.documentElement.clientHeight && document.documentElement.clientWidth)
+    {
+      winHeight = document.documentElement.clientHeight;
+      winWidth = document.documentElement.clientWidth;
+    }
+    var pd=document.getElementById('jin');  
+      pd.style.visibility="visible";
+      pd.style.left = winWidth/2 - 550 + 'px';
+      pd.style.top = winHeight/2 - 200 + 'px';    
+  }
+  window.onresize = function(){location.reload(true);}
+  
+  <!--window.onresize = function (){document.jin.location.reload(false);}-->
+  <!--window.onresize = function (){document.container.location.reload(false);}-->
+
+    findDimensions();
+</script>
+</body>
+</html>

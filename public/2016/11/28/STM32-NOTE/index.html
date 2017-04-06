@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="曾经沧海难为水，除却巫山不是云"><title>STM32型号命名规则 | 树下石</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/4.2.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script><script type="text/javascript" src="/js/jquery.leoweather.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/aplayer/1.5.2/APlayer.min.js"></script></head><body></body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">STM32型号命名规则</h1><a id="logo" href="/.">树下石</a><p class="description">不积跬步，无以至千里。<br/>不积小流，无以成江海。</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-book"> 文章</i></a><a href="/holiday/"><i class="fa fa-heart"> 节日</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1"><div class="content_container"><div class="post"><h1 class="post-title">STM32型号命名规则</h1><div class="post-meta">Nov 28, 2016<script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv">  <span id="busuanzi_value_page_pv"></span><span> 次阅读</span></span></div><a data-thread-key="2016/11/28/STM32-NOTE/" href="/2016/11/28/STM32-NOTE/#comments" class="ds-thread-count"></a><div class="post-content"><script src="/assets/js/APlayer.min.js"> </script><h2 id="stm32型号命名规则"><a href="#stm32型号命名规则" class="headerlink" title="stm32型号命名规则"></a>stm32型号命名规则</h2><p>示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">STM32 | F | 100 | C | 6 | T | 6 | B | XXX</div><div class="line">  1     2    3    4   5   6   7   8    9</div></pre></td></tr></table></figure>
+<p>从上面的料号可以看出以下信息：</p>
+<p>ST品牌ARM Cortex-Mx系列内核32位超值型MCU，LQFP -48封装 闪存容量32KB 温度范围-40℃-85℃；</p>
+<ol>
+<li><p>产品系列:<br>STM32代表ST品牌Cortex-Mx系列内核（ARM）的32位MCU；</p>
+</li>
+<li><p>产品类型: F：通用快闪（Flash Memory）；<br>L：低电压（1.65～3.6V）；F类型中F0xx和 F1xx系列为2.0～3.6V; F2xx和F4xx系列为1.8～3.6V;W：无线系统芯片,开发版.</p>
+</li>
+<li><p>产品子系列：<br>050：ARM Cortex-M0内核；051：ARM Cortex-M0内核；100：ARM Cortex-M3内核，超值型； 101：ARM Cortex-M3内核，基本型； 102：ARM Cortex-M3内核，USB基本型； 103：ARM Cortex-M3内核，增强型； 105：ARM Cortex-M3内核，USB互联网型； 107：ARM Cortex-M3内核，USB互联网型、以太网型； 108：ARM Cortex-M3内核，IEEE802.15.4标准； 151：ARM Cortex-M3内核，不带LCD； 152/162：ARM Cortex-M3内核，带LCD；<br>205/207：ARM Cortex-M3内核，不加密模块.（备注：150DMIPS，高达1MB闪存/128+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头；）<br>215/217：ARM Cortex-M3内核，加密模块。（备注：150DMIPS，高达1MB闪存/128+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头；）<br>405/407：ARM Cortex-M4内核，不加密模块。（备注：MCU+FPU，210DMIPS，高达1MB闪存/192+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头）；<br>415/417：ARM Cortex-M4内核，加密模块。（备注：MCU+FPU，210DMIPS，高达1MB闪存/192+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头）；</p>
+</li>
+<li><p>管脚数:<br>F：20PIN；G：28PIN；K：32PIN；T：36PIN；H：40PIN；C：48PIN；U：63PIN；R：64PIN；O：90PIN；V：100PINQ：132PIN；Z：144PIN； I：176PIN；</p>
+</li>
+<li><p>Flash存存容量:<br>4：16KB flash；（小容量）; 6：32KB flash；（小容量）;8：64KB flash；（中容量）;B：128KB flash；（中容量）;C：256KB flash；（大容量）;D：384KB flash；（大容量）;E：512KB flash；（大容量）;F：768KB flash；（大容量）;G：1MKB flash；（大容量）</p>
+</li>
+<li><p>封装:<br>T：LQFP；H：BGA；U：VFQFPN；Y：WLCSP/ WLCSP64；</p>
+</li>
+<li><p>温度范围:<br>6：-40℃-85℃；（工业级）; 7：-40℃-105℃；（工业级）</p>
+</li>
+<li><p>内部代码:<br>“A” or blank; A：48/32脚封装；Blank：28/20脚封装;</p>
+</li>
+<li><p>包装方式：<br>TR：带卷； XXX：盘装;D：电压范围1.65V – 3.6V且BOR无使能；无特性：电压范围1.8V – 3.6V且BOR使能；</p>
+</li>
+</ol>
+</div><div class="tags"></div><div class="post-nav"><a href="/2017/01/10/2017flag/" class="pre">2017,新的开始</a><a href="/2016/10/12/ARM-Addressing-Mode/" class="next">ARM寻址方式</a></div><div data-thread-key="2016/11/28/STM32-NOTE/" data-title="STM32型号命名规则" data-url="http://www.xn--4gqa63c686ta68iba.ren/2016/11/28/STM32-NOTE/" class="ds-share flat"><div class="ds-share-inline"><ul class="ds-share-icons-16"><li data-toggle="ds-share-icons-more"><a href="javascript:void(0);" class="ds-more">分享到：</a></li><li><a href="javascript:void(0);" data-service="wechat" class="ds-wechat">微信</a></li><li><a href="javascript:void(0);" data-service="weibo" class="ds-weibo">微博</a></li><li><a href="javascript:void(0);" data-service="qzone" class="ds-qzone">QQ空间</a></li><li><a href="javascript:void(0);" data-service="qqt" class="ds-qqt">腾讯微博</a></li></ul><div class="ds-share-icons-more"></div></div></div><div data-thread-key="2016/11/28/STM32-NOTE/" data-title="STM32型号命名规则" data-url="http://www.xn--4gqa63c686ta68iba.ren/2016/11/28/STM32-NOTE/" data-author-key="1" class="ds-thread"></div></div></div></div></div><div class="pure-u-1"><div id="footer">©2016 <a href="/." rel="nofollow">树下石.</a><a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Maupassant.</a><script type="text/javascript" src="https://s4.cnzz.com/z_stat.php?id=1260102884&amp;web_id=1260102884" language="JavaScript"></script></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script>var duoshuoQuery = {short_name:'tangguocheng'};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create','UA-80700049-1','auto');ga('send','pageview');
+</script><script>$('.weather').leoweather({format:'{城市}今日天气 {天气} {夜间气温}℃ ~ {白天气温}℃'});
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></html>

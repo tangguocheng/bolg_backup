@@ -1,0 +1,154 @@
+body {
+	font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", "sans-serif";
+}
+
+#random {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+}
+#myMap {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0.9;
+}
+#centerBottom {
+	position: absolute;
+	margin: auto;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: 1px;
+	height: 1px;
+	display: table;
+}
+
+
+#cellPhone {
+	position: absolute;
+	margin: auto;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: auto;
+	height: auto;
+	background-color: #BD362F;
+	color: white;
+	text-align: left;
+	font-weight: bold;
+	font-size: 22px;
+	border-radius: 8px;
+	display: none;
+}
+
+#imgGallery {
+	position: relative;
+	z-index: 999;
+	width: 100%;
+	height: 100%;
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+	display: none;
+}
+
+/* polaroids */
+.polaroids {
+	width: 970px;
+	height: 90%;
+	margin: auto;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	position: absolute;
+
+}
+.polaroids li {
+	display: inline;
+}
+.polaroids a {
+	background: #fff;
+	display: inline;
+	float: left;
+	margin: 0 0 27px 30px;
+	width: auto;
+	padding: 10px 10px 15px;
+	text-align: center;
+	text-decoration: none;
+	color: #333;
+	font-size: 18px;
+	-webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, .35);
+	-moz-box-shadow: 0 3px 6px rgba(0, 0, 0, .35);
+	-o-box-shadow: 0 3px 6px rgba(0, 0, 0, .35);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, .35);
+}
+.polaroids img {
+	display: block;
+	width: 190px;
+	margin-bottom: 12px;
+}
+.polaroids a:after {
+	content: attr(title);/* Ie8+,FF,Chorme,Safari */
+	font-weight: bold;
+}
+.polaroids li:nth-child(even) a {
+	-webkit-transform: rotate(2deg);
+	-moz-transform: rotate(2deg);
+	-ms-transform: rotate(2deg);
+	transform: rotate(2deg);
+}
+.polaroids li:nth-child(3n) a {
+	-webkit-transform: none;
+	-moz-transform: none;
+	-ms-transform: rotate(2deg);
+	transform: none;
+	position: relative;
+	top: -5px;
+}
+.polaroids li:nth-child(5n) a {
+	-webkit-transform: rotate(5deg);
+	-moz-transform: rotate(5deg);
+	-ms-transform: rotate(5deg);
+	transform: rotate(5deg);
+	position: relative;
+	right: 5px;
+}
+.polaroids li:nth-child(8n) a {
+	position: relative;
+	top: 8px;
+	right: 5px;
+}
+.polaroids li:nth-child(11n) a {
+	position: relative;
+	top: 3px;
+	right: -5px;
+}
+.polaroids li a:hover {
+	-webkit-transform: scale(1.25);
+	-moz-transform: scale(1.25);
+	-ms-transform: scale(1.25);
+	transform: scale(1.25);
+	-webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, .5);
+	-moz-box-shadow: 0 3px 6px rgba(0, 0, 0, .5);
+	-o-box-shadow: 0 3px 6px rgba(0, 0, 0, .5);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, .5);
+	position: relative;
+	z-index: 5;
+}
+.polaroids li.messy a {
+	margin-top: -375px;
+	margin-left: 160px;
+	-webkit-transform: rotate(-5deg);
+	-moz-transform: rotate(-5deg);
+	-ms-transform: rotate(-5deg);
+	transform: rotate(-5deg);
+}

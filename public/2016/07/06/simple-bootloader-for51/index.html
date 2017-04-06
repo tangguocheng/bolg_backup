@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="曾经沧海难为水，除却巫山不是云"><title>简易bootloader设计思路 | 树下石</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/4.2.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script><script type="text/javascript" src="/js/jquery.leoweather.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/aplayer/1.5.2/APlayer.min.js"></script></head><body></body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">简易bootloader设计思路</h1><a id="logo" href="/.">树下石</a><p class="description">不积跬步，无以至千里。<br/>不积小流，无以成江海。</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-book"> 文章</i></a><a href="/holiday/"><i class="fa fa-heart"> 节日</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1"><div class="content_container"><div class="post"><h1 class="post-title">简易bootloader设计思路</h1><div class="post-meta">Jul 6, 2016<span> | </span><span class="category"><a href="/categories/bootloader/">bootloader</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv">  <span id="busuanzi_value_page_pv"></span><span> 次阅读</span></span></div><a data-thread-key="2016/07/06/simple-bootloader-for51/" href="/2016/07/06/simple-bootloader-for51/#comments" class="ds-thread-count"></a><div class="clear"><div id="toc" class="toc-article"><div class="toc-title">文章目录</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Flash存储器空间分配"><span class="toc-number">1.</span> <span class="toc-text">Flash存储器空间分配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#软件设计思路"><span class="toc-number">2.</span> <span class="toc-text">软件设计思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#note"><span class="toc-number">3.</span> <span class="toc-text">note</span></a></li></ol></div></div><div class="post-content"><script src="/assets/js/APlayer.min.js"> </script><p>作为表计产品，限制于使用环境及产品制造特性（如超声波焊），通常在表计生产完成尤其是送到客户手中后，想要再升级固件程序，如果没有bootloader的支持，难度与代价都很大。因此，为现有平台所有系列的MCU添加bootloader程序是个刚性的需求。最近需要实现V9821的在线升级功能，研究了两天初步有了思路，接下来就是实现了，先记录下初步的思路。</p>
+<a id="more"></a>
+<p>实现bootloader的前提条件有：</p>
+<ul>
+<li>IAP功能</li>
+<li>代码区足够大或存在外部flash</li>
+</ul>
+<p>对于51单片机，最大支持64Kb的程序代码，其中包括中断向量、启动代码、用户代码、bootloader代码，因此需要合理分配flash空间。对于vango的V98xx系列单片机，程序存储区地址映射如下图:</p>
+<center><img src="http://o9kzgz0kz.bkt.clouddn.com/V9811_FLASH.jpg" alt="v9821_FLASH"></center>
+
+<p>Flash存储器的<strong>008000h–01FFFFh</strong>的内容根据代码段选择寄存器<code>CBANK,SFR 0xA0</code>的配置，以32KB为单位，选择行的映射到程序存储器<strong>0x8000-0xFFFF</strong>区域。其中<code>common area</code>为公共代码区，使用时不需要切换<code>Code Bank</code>，默认代码段为<code>Bank1</code>。</p>
+<p>使用时刻根据实际情况考虑是否使用<code>bank switch</code>技术，因为我用于验证的用户代码不大，加上bootloader程序也远达不到64Kb的代码量，因此不分<code>bank</code>。</p>
+<h2 id="Flash存储器空间分配"><a href="#Flash存储器空间分配" class="headerlink" title="Flash存储器空间分配"></a>Flash存储器空间分配</h2><ul>
+<li>0x0000-0x03FF: 中断向量表</li>
+<li>0x0400-0x05FF: 512字节的出厂参数，单片机正常工作所必须的参数，不用于用户代码。</li>
+<li>0x0600-0xD5FF: 用户代码</li>
+<li>0xD600-0xD7FF: 中断映射代码</li>
+<li>0xD800-0xD8FF: 启动代码</li>
+<li>0xD900-0xFFFF: bootloader代码</li>
+</ul>
+<blockquote>
+<p>其中启动代码、bootloader均位于不可IAP区。<strong>0x000-0x03FF为不可IAP区域，硬件不支持</strong></p>
+</blockquote>
+<h2 id="软件设计思路"><a href="#软件设计思路" class="headerlink" title="软件设计思路"></a>软件设计思路</h2><ol>
+<li>上电复位：执行startup，跳转到bootloader代码；</li>
+<li>在bootloader中首先检查升级指令是否存在<sup>[1]</sup>，如果不存在跳转到用户代码，反之执行升级 。</li>
+<li>用户代码中也可被升级指令切换至bootloader程序；</li>
+<li>等待数据（等待时长可设），超时复位到用户代码；</li>
+<li>接收升级数据并校验<sup>[2]</sup>。</li>
+<li>写入update<sup>[3]</sup>。</li>
+<li>全部接收完成并校验通过，擦除用户代码，写入升级数据<sup>[4]</sup>。</li>
+</ol>
+<h2 id="note"><a href="#note" class="headerlink" title="note"></a>note</h2><ol>
+<li>可使用xdata区的固定位置的全局变量或者相关IO标志。</li>
+<li>使用hex文件格式的校验方式：校验和 = 0x100 - 累加和</li>
+<li>如果代码不超过32KB，直接写入update区。如果超过32KB，使用外部存储或者直接擦除用户代码，写入升级数据。</li>
+<li>写入的时候以16个字节为一组写入。</li>
+</ol>
+</div><div class="tags"><a href="/tags/嵌入式-单片机/">嵌入式 单片机</a></div><div class="post-nav"><a href="/2016/07/14/bootloader-Caution/" class="pre">bootloader使用注意事项</a></div><div data-thread-key="2016/07/06/simple-bootloader-for51/" data-title="简易bootloader设计思路" data-url="http://www.xn--4gqa63c686ta68iba.ren/2016/07/06/simple-bootloader-for51/" class="ds-share flat"><div class="ds-share-inline"><ul class="ds-share-icons-16"><li data-toggle="ds-share-icons-more"><a href="javascript:void(0);" class="ds-more">分享到：</a></li><li><a href="javascript:void(0);" data-service="wechat" class="ds-wechat">微信</a></li><li><a href="javascript:void(0);" data-service="weibo" class="ds-weibo">微博</a></li><li><a href="javascript:void(0);" data-service="qzone" class="ds-qzone">QQ空间</a></li><li><a href="javascript:void(0);" data-service="qqt" class="ds-qqt">腾讯微博</a></li></ul><div class="ds-share-icons-more"></div></div></div><div data-thread-key="2016/07/06/simple-bootloader-for51/" data-title="简易bootloader设计思路" data-url="http://www.xn--4gqa63c686ta68iba.ren/2016/07/06/simple-bootloader-for51/" data-author-key="1" class="ds-thread"></div></div></div></div></div><div class="pure-u-1"><div id="footer">©2016 <a href="/." rel="nofollow">树下石.</a><a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Maupassant.</a><script type="text/javascript" src="https://s4.cnzz.com/z_stat.php?id=1260102884&amp;web_id=1260102884" language="JavaScript"></script></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script>var duoshuoQuery = {short_name:'tangguocheng'};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create','UA-80700049-1','auto');ga('send','pageview');
+</script><script>$('.weather').leoweather({format:'{城市}今日天气 {天气} {夜间气温}℃ ~ {白天气温}℃'});
+</script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></html>

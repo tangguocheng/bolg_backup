@@ -1,0 +1,841 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>树下石</title>
+  <subtitle>不积跬步，无以至千里。&lt;br/&gt;不积小流，无以成江海。</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://www.xn--4gqa63c686ta68iba.ren/"/>
+  <updated>2017-03-14T08:00:36.000Z</updated>
+  <id>http://www.xn--4gqa63c686ta68iba.ren/</id>
+  
+  <author>
+    <name>tanggc`s blog</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>STM32模拟I2C读取BQ34Z100</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2017/03/14/SMT32_I2C/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2017/03/14/SMT32_I2C/</id>
+    <published>2017-03-14T15:18:21.000Z</published>
+    <updated>2017-03-14T08:00:36.000Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>总线拉低使用开漏输出、拉高配置为浮动输入以释放总线。同时因为此时为输入模式，ACK的检测可以很方便做到。</p>
+<h1 id="源文件"><a href="#源文件" class="headerlink" title="源文件"></a>源文件</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div><div class="line">250</div><div class="line">251</div><div class="line">252</div><div class="line">253</div><div class="line">254</div><div class="line">255</div><div class="line">256</div><div class="line">257</div><div class="line">258</div><div class="line">259</div><div class="line">260</div><div class="line">261</div><div class="line">262</div><div class="line">263</div><div class="line">264</div><div class="line">265</div><div class="line">266</div><div class="line">267</div><div class="line">268</div><div class="line">269</div><div class="line">270</div><div class="line">271</div><div class="line">272</div><div class="line">273</div><div class="line">274</div><div class="line">275</div><div class="line">276</div><div class="line">277</div><div class="line">278</div><div class="line">279</div><div class="line">280</div><div class="line">281</div><div class="line">282</div><div class="line">283</div><div class="line">284</div><div class="line">285</div><div class="line">286</div><div class="line">287</div><div class="line">288</div><div class="line">289</div><div class="line">290</div><div class="line">291</div><div class="line">292</div><div class="line">293</div><div class="line">294</div><div class="line">295</div><div class="line">296</div><div class="line">297</div><div class="line">298</div><div class="line">299</div><div class="line">300</div><div class="line">301</div><div class="line">302</div><div class="line">303</div><div class="line">304</div><div class="line">305</div><div class="line">306</div><div class="line">307</div><div class="line">308</div><div class="line">309</div><div class="line">310</div><div class="line">311</div><div class="line">312</div><div class="line">313</div><div class="line">314</div><div class="line">315</div><div class="line">316</div><div class="line">317</div><div class="line">318</div><div class="line">319</div><div class="line">320</div><div class="line">321</div><div class="line">322</div><div class="line">323</div><div class="line">324</div><div class="line">325</div><div class="line">326</div><div class="line">327</div><div class="line">328</div><div class="line">329</div><div class="line">330</div><div class="line">331</div><div class="line">332</div><div class="line">333</div><div class="line">334</div><div class="line">335</div><div class="line">336</div><div class="line">337</div><div class="line">338</div><div class="line">339</div><div class="line">340</div><div class="line">341</div><div class="line">342</div><div class="line">343</div><div class="line">344</div><div class="line">345</div><div class="line">346</div><div class="line">347</div><div class="line">348</div><div class="line">349</div><div class="line">350</div><div class="line">351</div><div class="line">352</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stm32f10x.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"battery_manage.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"delay.h"</span></span></div><div class="line"><span class="keyword">static</span> <span class="keyword">battery_t</span> battery_1;</div><div class="line"><span class="keyword">static</span> <span class="keyword">battery_t</span> battery_2;</div><div class="line"><span class="keyword">static</span> GPIO_TypeDef* BQ34Z100_GPIO_SCL;</div><div class="line"><span class="keyword">static</span> <span class="keyword">uint16_t</span> BQ34Z100_SCL_pin;</div><div class="line"><span class="keyword">static</span> GPIO_TypeDef* BQ34Z100_GPIO_SDA;</div><div class="line"><span class="keyword">static</span> <span class="keyword">uint16_t</span> BQ34Z100_SDA_pin;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 字节转u16</div><div class="line"> * @param u8* data 字节指针</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> u16 <span class="title">bytes_to_integer</span><span class="params">(u8* data)</span></span></div><div class="line">&#123;</div><div class="line">	u16 tmp;</div><div class="line"></div><div class="line">	tmp = ((data[<span class="number">1</span>] &lt;&lt; <span class="number">8</span>) &amp; <span class="number">0xFF00</span>);</div><div class="line">	<span class="keyword">return</span> ((u16)(tmp + data[<span class="number">0</span>]) &amp; <span class="number">0x0000FFFF</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 IO配置</div><div class="line"> * @param IO参数</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_io_config</span><span class="params">(GPIO_TypeDef* GPIO_SCL, <span class="keyword">uint16_t</span> SCL_pin,</span></span></div><div class="line">                        GPIO_TypeDef* GPIO_SDA, <span class="keyword">uint16_t</span> SDA_pin)</div><div class="line">&#123;</div><div class="line">	BQ34Z100_GPIO_SCL = GPIO_SCL;</div><div class="line">	BQ34Z100_SCL_pin = SCL_pin;</div><div class="line">	BQ34Z100_GPIO_SDA = GPIO_SDA;</div><div class="line">	BQ34Z100_SDA_pin = SDA_pin;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 I2C起始信号</div><div class="line"> * @param NONE</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_i2c_start</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line">	SDA_1();</div><div class="line">	I2CDELAY();</div><div class="line">	SCL_1();</div><div class="line">	I2CDELAY();</div><div class="line">	SDA_0();</div><div class="line">	I2CDELAY();</div><div class="line">	SCL_0();</div><div class="line">	I2CDELAY();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 I2C停止信号</div><div class="line"> * @param NONE</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_i2c_stop</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line">	SDA_0();</div><div class="line">	I2CDELAY();</div><div class="line">	SCL_1();</div><div class="line">	I2CDELAY();</div><div class="line">	SDA_1();</div><div class="line">	I2CDELAY();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 I2C发送字节</div><div class="line"> * @param u8 data 发送数据</div><div class="line"> * @return ACK</div><div class="line"> */</div><div class="line"><span class="function">u8 <span class="title">bq34z100_i2c_send_byte</span><span class="params">(u8 data)</span></span></div><div class="line">&#123;</div><div class="line">	u8 bits, temp, ack;</div><div class="line">	u16 wait_cnt;</div><div class="line">	SCL_0();</div><div class="line">	temp = data;</div><div class="line">	bits = <span class="number">0x08</span>;</div><div class="line">	<span class="keyword">while</span> (bits != <span class="number">0x00</span>) &#123;</div><div class="line">		<span class="keyword">if</span> (temp &amp; <span class="number">0x80</span>)</div><div class="line">			SDA_1();</div><div class="line">		<span class="keyword">else</span></div><div class="line">			SDA_0();</div><div class="line">		I2CDELAY();</div><div class="line">		SCL_1();</div><div class="line">		wait_cnt = <span class="number">0</span>;</div><div class="line">		<span class="keyword">while</span> ((BQ34Z100_GPIO_SCL-&gt;IDR &amp; BQ34Z100_SCL_pin) == <span class="number">0</span>) &#123;</div><div class="line">			wait_cnt++;</div><div class="line">			<span class="keyword">if</span> (wait_cnt &gt; <span class="number">200</span>) &#123;</div><div class="line">				bq34z100_i2c_stop();</div><div class="line">				<span class="keyword">return</span> (<span class="number">0</span>);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		I2CDELAY();</div><div class="line">		temp = (temp &lt;&lt; <span class="number">1</span>);</div><div class="line">		SCL_0();</div><div class="line">		bits = (bits - <span class="number">1</span>);</div><div class="line">	&#125;</div><div class="line">	I2CDELAY();</div><div class="line">	SDA_1();</div><div class="line">	SCL_1();</div><div class="line">	wait_cnt = <span class="number">0</span>;</div><div class="line">	<span class="keyword">while</span> ((BQ34Z100_GPIO_SCL-&gt;IDR &amp; BQ34Z100_SCL_pin) == <span class="number">0</span>) &#123;</div><div class="line">		wait_cnt++;</div><div class="line">		<span class="keyword">if</span> (wait_cnt &gt; <span class="number">200</span>) &#123;</div><div class="line">			bq34z100_i2c_stop();</div><div class="line">			<span class="keyword">return</span> (<span class="number">0</span>);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	I2CDELAY();</div><div class="line">	ack = (((BQ34Z100_GPIO_SDA-&gt;IDR &amp; BQ34Z100_SDA_pin) == <span class="number">0</span>) ? <span class="number">0</span> : <span class="number">1</span>);</div><div class="line">	SCL_0();</div><div class="line">	<span class="keyword">if</span> (ack)</div><div class="line">		<span class="keyword">return</span> (<span class="number">1</span>);</div><div class="line">	<span class="keyword">else</span></div><div class="line">		<span class="keyword">return</span> (<span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 I2C接收字节</div><div class="line"> * @param u8 ack 是否响应ACK</div><div class="line"> * @return u8 data 接收数据</div><div class="line"> */</div><div class="line"><span class="function">u8 <span class="title">bq34z100_i2c_rev_byte</span><span class="params">(u8 ack)</span></span></div><div class="line">&#123;</div><div class="line">	u8 bits, data = <span class="number">0</span>;</div><div class="line"></div><div class="line">	SDA_1();</div><div class="line">	bits = <span class="number">0x08</span>;</div><div class="line">	<span class="keyword">while</span> (bits &gt; <span class="number">0</span>) &#123;</div><div class="line">		SCL_1();</div><div class="line">		<span class="keyword">while</span> ((BQ34Z100_GPIO_SCL-&gt;IDR &amp; BQ34Z100_SCL_pin) == <span class="number">0</span>)</div><div class="line">			I2CDELAY();</div><div class="line">		data = (data &lt;&lt; <span class="number">1</span>);</div><div class="line">		<span class="keyword">if</span> (BQ34Z100_GPIO_SDA-&gt;IDR &amp; BQ34Z100_SDA_pin)</div><div class="line">			data = (data + <span class="number">1</span>);</div><div class="line">		SCL_0();</div><div class="line">		I2CDELAY();</div><div class="line">		bits = (bits - <span class="number">1</span>);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> (ack)</div><div class="line">		SDA_0();</div><div class="line">	<span class="keyword">else</span></div><div class="line">		SDA_1();</div><div class="line">	SCL_1();</div><div class="line">	I2CDELAY();</div><div class="line">	SCL_0();</div><div class="line">	SDA_1();</div><div class="line"></div><div class="line">	<span class="keyword">return</span> (data);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 写入数据块</div><div class="line"> * @param u8 SlaveAddress  设备地址</div><div class="line"> * @param u16 numBytes 读取字节</div><div class="line"> * @param void* rx_data 数据指针</div><div class="line"> * @param unsigned char multi 是否多数据帧</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_i2c_write_block</span><span class="params">(u8 SlaveAddress,</span></span></div><div class="line">                              u16 numBytes, u8 multi,</div><div class="line">                              <span class="keyword">void</span>* TxData)</div><div class="line">&#123;</div><div class="line">	u16  i;</div><div class="line">	u8* temp;</div><div class="line"></div><div class="line">	temp = (u8*)TxData;</div><div class="line">	bq34z100_i2c_start();</div><div class="line">	bq34z100_i2c_send_byte(SlaveAddress + <span class="number">0</span>);</div><div class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; numBytes; i++) &#123;</div><div class="line">		bq34z100_i2c_send_byte(*(temp));</div><div class="line">		temp++;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> (multi == <span class="number">0</span>) &#123;</div><div class="line">		bq34z100_i2c_stop();</div><div class="line">	&#125;</div><div class="line">	I2CDELAY();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 读取数据块</div><div class="line"> * @param u8 SlaveAddress  设备地址</div><div class="line"> * @param u16 numBytes 读取字节</div><div class="line"> * @param void* rx_data 数据指针</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_i2c_read_block</span><span class="params">(u8 SlaveAddress,</span></span></div><div class="line">                             u16 numBytes, <span class="keyword">void</span>* rx_data)</div><div class="line">&#123;</div><div class="line">	u16  i;</div><div class="line">	u8* temp;</div><div class="line"></div><div class="line">	temp = (u8*)rx_data;</div><div class="line">	bq34z100_i2c_start();</div><div class="line">	bq34z100_i2c_send_byte(SlaveAddress + <span class="number">1</span>);</div><div class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; numBytes; i++) &#123;</div><div class="line">		<span class="keyword">if</span> (i == (numBytes - <span class="number">1</span>))</div><div class="line">			*(temp) = bq34z100_i2c_rev_byte(BQ34Z100_NACK);</div><div class="line">		<span class="keyword">else</span></div><div class="line">			*(temp) = bq34z100_i2c_rev_byte(BQ34Z100_ACK);</div><div class="line">		temp++;</div><div class="line">	&#125;</div><div class="line">	bq34z100_i2c_stop();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 i2c初始化</div><div class="line"> * @param NONE</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_i2c_init</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line"></div><div class="line">	GPIO_InitTypeDef  GPIO_InitStructure;</div><div class="line">	GPIO_InitStructure.GPIO_Pin = BQ34Z100_SDA_pin;</div><div class="line">	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;</div><div class="line">	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;</div><div class="line">	GPIO_Init(BQ34Z100_GPIO_SDA, &amp;GPIO_InitStructure);</div><div class="line"></div><div class="line">	GPIO_InitStructure.GPIO_Pin = BQ34Z100_SCL_pin;</div><div class="line">	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;</div><div class="line">	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;</div><div class="line">	GPIO_Init(BQ34Z100_GPIO_SCL, &amp;GPIO_InitStructure);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100寄存器读取</div><div class="line"> * @param u8 port_switch 端口选择 1：电池1,2：电池2</div><div class="line"> * @param u16 bytes 读取字节</div><div class="line"> * @param void* rx_data 数据指针</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_read_reg</span><span class="params">(u8 port_switch, u8 cmd, u16 bytes, <span class="keyword">void</span>* rx_data)</span></span></div><div class="line">&#123;</div><div class="line">	u8 tx[<span class="number">1</span>];</div><div class="line">	tx[<span class="number">0</span>] = cmd;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (port_switch == <span class="number">1</span>) &#123;</div><div class="line">		bq34z100_io_config(BATTERY_1_I2C_SCL_GPIO, BATTERY_1_I2C_SCL_PIN,</div><div class="line">		                   BATTERY_1_I2C_SDA_GPIO, BATTERY_1_I2C_SDA_PIN);</div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (port_switch == <span class="number">2</span>) &#123;</div><div class="line">		bq34z100_io_config(BATTERY_2_I2C_SCL_GPIO, BATTERY_2_I2C_SCL_PIN,</div><div class="line">		                   BATTERY_2_I2C_SDA_GPIO, BATTERY_2_I2C_SDA_PIN);</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		<span class="keyword">return</span>;</div><div class="line">	&#125;</div><div class="line">	bq34z100_i2c_init();</div><div class="line">	delay_nus(<span class="number">200</span>);</div><div class="line">	bq34z100_i2c_write_block(BQ34Z100_ADDR, <span class="number">1</span>, <span class="number">1</span>, tx);</div><div class="line">	bq34z100_i2c_read_block(BQ34Z100_ADDR, bytes, rx_data);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100 状态标识处理</div><div class="line"> * @param u8 battery_num 电池号</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">bq34z100_flag_process</span><span class="params">(u8 battery_num)</span></span></div><div class="line">&#123;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * @brief BQ34Z100信息读取</div><div class="line"> * @param u8 battery_num 电池号</div><div class="line"> * @return NONE</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">BQ34Z100_get_charge_state</span><span class="params">(u8 battery_num)</span></span></div><div class="line">&#123;</div><div class="line">	u8 tmp[<span class="number">2</span>];</div><div class="line">	<span class="keyword">static</span> u8 step[<span class="number">2</span>] = &#123;<span class="number">0</span>, <span class="number">0</span>&#125;;</div><div class="line">    </div><div class="line">    <span class="keyword">battery_t</span>* battery;</div><div class="line">    </div><div class="line">    <span class="keyword">if</span> (battery_num == <span class="number">1</span>)</div><div class="line">        battery = &amp;battery_1;</div><div class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (battery_num == <span class="number">2</span>)</div><div class="line">        battery = &amp;battery_2;</div><div class="line">    <span class="keyword">else</span> </div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    </div><div class="line">	<span class="keyword">switch</span> (step[battery_num - <span class="number">1</span>]) &#123;</div><div class="line">	<span class="keyword">case</span> <span class="number">0</span>:</div><div class="line">		<span class="comment">// 温度 K</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_TEMPERATURE_LSB, <span class="number">2</span>, tmp);</div><div class="line">		battery-&gt;temperature = bytes_to_integer(tmp);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"temperature:%d\n\n"</span>, (battery-&gt;temperature - <span class="number">2731</span>) / <span class="number">10</span>);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">case</span> <span class="number">1</span>:</div><div class="line">		<span class="comment">// 电量百分比 0-100%</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_STATE_OF_CHARGE, <span class="number">1</span>, tmp);</div><div class="line">		battery-&gt;charge_state = tmp[<span class="number">0</span>];</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"Percentage of electricity:%d \n\n"</span>, battery-&gt;charge_state);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">case</span> <span class="number">2</span>:</div><div class="line">		<span class="comment">// 电池容量 mAh (充满电之后校准)</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_FULL_CHAGRE_CAP_LSB, <span class="number">2</span>, tmp);</div><div class="line">		battery-&gt;full_charge_cap = bytes_to_integer(tmp);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"total capacity:%d mAh \n\n"</span>, battery-&gt;full_charge_cap);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">case</span> <span class="number">3</span>:</div><div class="line">		<span class="comment">// 剩余电池容量 * 1 mAh</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_REMAIN_CAP_LSB, <span class="number">2</span>, tmp);</div><div class="line">		battery-&gt;remain_cap = bytes_to_integer(tmp);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"remain capacity:%d mAh \n\n"</span>, battery-&gt;remain_cap);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">case</span> <span class="number">4</span>:</div><div class="line">		<span class="comment">// 电压 mV</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_VOLTAGE_LSB, <span class="number">2</span>, tmp);</div><div class="line">		battery-&gt;voltage = bytes_to_integer(tmp);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"voltage:%d mV \n\n"</span>, battery-&gt;voltage);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">case</span> <span class="number">5</span>:</div><div class="line">		<span class="comment">// 电流 mA</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_CURRENT_LSB, <span class="number">2</span>, tmp);</div><div class="line">		battery-&gt;current = bytes_to_integer(tmp);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"current:%d mA \n\n"</span>, battery-&gt;current);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">case</span> <span class="number">6</span>:</div><div class="line">		<span class="comment">// 运行标志</span></div><div class="line">		bq34z100_read_reg(battery_num, BQ34Z100_FLAGS_LSB, <span class="number">2</span>, tmp);</div><div class="line">		battery-&gt;flag = bytes_to_integer(tmp);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"[%d] "</span>, battery_num);</div><div class="line">		<span class="built_in">printf</span>(<span class="string">"run flag:%x \n\n"</span>, battery-&gt;flag);</div><div class="line">		<span class="keyword">break</span>;</div><div class="line"></div><div class="line">	<span class="keyword">default</span>:</div><div class="line"></div><div class="line">		<span class="keyword">break</span>;</div><div class="line">	&#125;</div><div class="line">    </div><div class="line">	(step[battery_num - <span class="number">1</span>] &gt; <span class="number">6</span>) ? (step[battery_num - <span class="number">1</span>] = <span class="number">0</span>) :</div><div class="line">                                   step[battery_num - <span class="number">1</span>]++;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> _BATTERY_MANAGE_H</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> _BATTERY_MANAGE_H</span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"type.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stm32f10x.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_1_I2C_SCL_GPIO  GPIOB</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_1_I2C_SCL_PIN   GPIO_Pin_8</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_1_I2C_SDA_GPIO  GPIOB</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_1_I2C_SDA_PIN   GPIO_Pin_9</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_2_I2C_SCL_GPIO  GPIOB</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_2_I2C_SCL_PIN   GPIO_Pin_10</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_2_I2C_SDA_GPIO  GPIOB</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BATTERY_2_I2C_SDA_PIN   GPIO_Pin_11</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_ADDR 0xAA</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> SDA_1() do&#123;\</span></div><div class="line">                    GPIO_InitTypeDef  GPIO_InitStructure;\</div><div class="line">                    GPIO_InitStructure.GPIO_Pin = BQ34Z100_SDA_pin;\</div><div class="line">                    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;\</div><div class="line">                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;\</div><div class="line">                    GPIO_Init(BQ34Z100_GPIO_SDA, &amp;GPIO_InitStructure);\</div><div class="line">                 &#125; while (0)</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> SDA_0() do&#123;\</span></div><div class="line">                    GPIO_InitTypeDef  GPIO_InitStructure;\</div><div class="line">                    GPIO_InitStructure.GPIO_Pin = BQ34Z100_SDA_pin;\</div><div class="line">                    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;\</div><div class="line">                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;\</div><div class="line">                    GPIO_Init(BQ34Z100_GPIO_SDA, &amp;GPIO_InitStructure);\</div><div class="line">                    GPIO_ResetBits(BQ34Z100_GPIO_SDA, BQ34Z100_SDA_pin);\</div><div class="line">                 &#125; while (0)</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> SCL_1() do&#123;\</span></div><div class="line">                    GPIO_InitTypeDef  GPIO_InitStructure;\</div><div class="line">                    GPIO_InitStructure.GPIO_Pin = BQ34Z100_SCL_pin;\</div><div class="line">                    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;\</div><div class="line">                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;\</div><div class="line">                    GPIO_Init(BQ34Z100_GPIO_SCL, &amp;GPIO_InitStructure);\</div><div class="line">                 &#125; while (0)</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> SCL_0() do&#123;\</span></div><div class="line">                    GPIO_InitTypeDef  GPIO_InitStructure;\</div><div class="line">                    GPIO_InitStructure.GPIO_Pin = BQ34Z100_SCL_pin;\</div><div class="line">                    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;\</div><div class="line">                    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;\</div><div class="line">                    GPIO_Init(BQ34Z100_GPIO_SCL, &amp;GPIO_InitStructure);\</div><div class="line">                    GPIO_ResetBits(BQ34Z100_GPIO_SCL, BQ34Z100_SCL_pin);\</div><div class="line">                 &#125; while (0)</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> I2CDELAY()  delay_nus(5)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_NACK 0</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_ACK 1</span></div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123;</div><div class="line">	u16 charge_state;</div><div class="line">	u16 remain_cap;</div><div class="line">	u16 full_charge_cap;</div><div class="line">	u16 voltage;</div><div class="line">	u16 temperature;</div><div class="line">	u16 current;</div><div class="line">	u16 flag;</div><div class="line">&#125; <span class="keyword">battery_t</span>;</div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_CONTROL_LSB    0x00</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_CONTROL_MSB    0x01</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_STATE_OF_CHARGE    0x02</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_MAX_ERROR      0x03</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_REMAIN_CAP_LSB 0x04</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_REMAIN_CAP_MSB 0x05</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_FULL_CHAGRE_CAP_LSB 0x06</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_FULL_CHAGRE_CAP_MSB 0x07</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_VOLTAGE_LSB 0x08</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_VOLTAGE_MSB 0x09</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_AVA_CURRENT_LSB 0x0A</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_AVA_CURRENT_MSB 0x0B</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_TEMPERATURE_LSB 0x0C</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_TEMPERATURE_MSB 0x0D</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_FLAGS_LSB      0x0E</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_FLAGS_MSB      0x0F</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_CURRENT_LSB      0x10</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_CURRENT_MSB      0x11</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_FLAGSB_LSB      0x12</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> BQ34Z100_FLAGSB_MSB      0x13</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT0    0x0001</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT1    0x0002</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT2    0x0004</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT3    0x0008</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT4    0x0010</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT5    0x0020</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT6    0x0040</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> LSB_BIT7    0x0080</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT0    0x0100</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT1    0x0200</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT2    0x0400</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT3    0x0800</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT4    0x1000</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT5    0x2000</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT6    0x4000</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> MSB_BIT7    0x8000</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_OTC        MSB_BIT7    <span class="comment">// 充电过温</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_OTD        MSB_BIT6</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_BATHI      MSB_BIT5</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_BATLOW     MSB_BIT4</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_CHG_INH    MSB_BIT3</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_XCHG       MSB_BIT2</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_FC         MSB_BIT1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_CHG        MSB_BIT0</span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_OCVTAKEN   LSB_BIT7</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_RSVD0      LSB_BIT6</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_RSVD1      LSB_BIT5</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_CF         LSB_BIT4</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_RSVD2      LSB_BIT3</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_SOC1       LSB_BIT2</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_SOCF       LSB_BIT1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FLAG_DSG        LSB_BIT0</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">BQ34Z100_get_charge_state</span><span class="params">(u8 battery_num)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">battery_init</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;总线拉低使用开漏输出、拉高配置为浮动输入以释放总线。同时因为此时为输入模式，ACK的检测可以很方便做到。&lt;/p&gt;
+&lt;h1 id=&quot;源文件&quot;&gt;&lt;a href=&quot;#源文件&quot; cl
+    
+    </summary>
+    
+    
+      <category term="STM32" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/STM32/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2017,新的开始</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2017/01/10/2017flag/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2017/01/10/2017flag/</id>
+    <published>2017-01-10T09:28:07.000Z</published>
+    <updated>2017-01-10T01:55:31.630Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h1 id="2017，给自己立下几个FLAG"><a href="#2017，给自己立下几个FLAG" class="headerlink" title="2017，给自己立下几个FLAG"></a>2017，给自己立下几个FLAG</h1><h2 id="新语言"><a href="#新语言" class="headerlink" title="新语言"></a>新语言</h2><ul>
+<li>python3</li>
+<li>C#</li>
+<li>C++</li>
+<li>JAVA (OP)</li>
+</ul>
+<h2 id="新技能"><a href="#新技能" class="headerlink" title="新技能"></a>新技能</h2><ul>
+<li><strong>嵌入式linux驱动开发</strong></li>
+<li>桌面应用 || 手机应用开发</li>
+</ul>
+<h2 id="新生活"><a href="#新生活" class="headerlink" title="新生活"></a>新生活</h2><ul>
+<li>再多学会做几个菜品</li>
+<li><em>锻炼、锻炼、锻炼</em></li>
+</ul>
+<h2 id="新未来"><a href="#新未来" class="headerlink" title="新未来"></a>新未来</h2><ul>
+<li>结婚</li>
+<li>买房</li>
+</ul>
+<p>未完待续……</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h1 id=&quot;2017，给自己立下几个FLAG&quot;&gt;&lt;a href=&quot;#2017，给自己立下几个FLAG&quot; class=&quot;headerlink&quot; title=&quot;2017，给自己立下
+    
+    </summary>
+    
+      <category term="2017" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/2017/"/>
+    
+    
+      <category term="2017" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/2017/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>STM32型号命名规则</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/11/28/STM32-NOTE/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/11/28/STM32-NOTE/</id>
+    <published>2016-11-28T11:11:33.000Z</published>
+    <updated>2016-12-09T02:36:57.880Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h2 id="stm32型号命名规则"><a href="#stm32型号命名规则" class="headerlink" title="stm32型号命名规则"></a>stm32型号命名规则</h2><p>示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">STM32 | F | 100 | C | 6 | T | 6 | B | XXX</div><div class="line">  1     2    3    4   5   6   7   8    9</div></pre></td></tr></table></figure>
+<p>从上面的料号可以看出以下信息：</p>
+<p>ST品牌ARM Cortex-Mx系列内核32位超值型MCU，LQFP -48封装 闪存容量32KB 温度范围-40℃-85℃；</p>
+<ol>
+<li><p>产品系列:<br>STM32代表ST品牌Cortex-Mx系列内核（ARM）的32位MCU；</p>
+</li>
+<li><p>产品类型: F：通用快闪（Flash Memory）；<br>L：低电压（1.65～3.6V）；F类型中F0xx和 F1xx系列为2.0～3.6V; F2xx和F4xx系列为1.8～3.6V;W：无线系统芯片,开发版.</p>
+</li>
+<li><p>产品子系列：<br>050：ARM Cortex-M0内核；051：ARM Cortex-M0内核；100：ARM Cortex-M3内核，超值型； 101：ARM Cortex-M3内核，基本型； 102：ARM Cortex-M3内核，USB基本型； 103：ARM Cortex-M3内核，增强型； 105：ARM Cortex-M3内核，USB互联网型； 107：ARM Cortex-M3内核，USB互联网型、以太网型； 108：ARM Cortex-M3内核，IEEE802.15.4标准； 151：ARM Cortex-M3内核，不带LCD； 152/162：ARM Cortex-M3内核，带LCD；<br>205/207：ARM Cortex-M3内核，不加密模块.（备注：150DMIPS，高达1MB闪存/128+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头；）<br>215/217：ARM Cortex-M3内核，加密模块。（备注：150DMIPS，高达1MB闪存/128+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头；）<br>405/407：ARM Cortex-M4内核，不加密模块。（备注：MCU+FPU，210DMIPS，高达1MB闪存/192+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头）；<br>415/417：ARM Cortex-M4内核，加密模块。（备注：MCU+FPU，210DMIPS，高达1MB闪存/192+4KB RAM，USB OTG HS/FS，以太网，17个TIM，3个ADC，15个通信外设接口和摄像头）；</p>
+</li>
+<li><p>管脚数:<br>F：20PIN；G：28PIN；K：32PIN；T：36PIN；H：40PIN；C：48PIN；U：63PIN；R：64PIN；O：90PIN；V：100PINQ：132PIN；Z：144PIN； I：176PIN；</p>
+</li>
+<li><p>Flash存存容量:<br>4：16KB flash；（小容量）; 6：32KB flash；（小容量）;8：64KB flash；（中容量）;B：128KB flash；（中容量）;C：256KB flash；（大容量）;D：384KB flash；（大容量）;E：512KB flash；（大容量）;F：768KB flash；（大容量）;G：1MKB flash；（大容量）</p>
+</li>
+<li><p>封装:<br>T：LQFP；H：BGA；U：VFQFPN；Y：WLCSP/ WLCSP64；</p>
+</li>
+<li><p>温度范围:<br>6：-40℃-85℃；（工业级）; 7：-40℃-105℃；（工业级）</p>
+</li>
+<li><p>内部代码:<br>“A” or blank; A：48/32脚封装；Blank：28/20脚封装;</p>
+</li>
+<li><p>包装方式：<br>TR：带卷； XXX：盘装;D：电压范围1.65V – 3.6V且BOR无使能；无特性：电压范围1.8V – 3.6V且BOR使能；</p>
+</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h2 id=&quot;stm32型号命名规则&quot;&gt;&lt;a href=&quot;#stm32型号命名规则&quot; class=&quot;headerlink&quot; title=&quot;stm32型号命名规则&quot;&gt;&lt;/a&gt;stm
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>ARM寻址方式</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/10/12/ARM-Addressing-Mode/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/10/12/ARM-Addressing-Mode/</id>
+    <published>2016-10-12T09:20:43.000Z</published>
+    <updated>2016-10-12T06:09:07.396Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h1 id="ARM-处理器寻址方式"><a href="#ARM-处理器寻址方式" class="headerlink" title="ARM 处理器寻址方式"></a>ARM 处理器寻址方式</h1><p>所谓寻址方式，是根据指令中的地址码来实现寻找真实操作数地址的方式，ARM处理器有9种基本寻址方式。</p>
+<h2 id="寄存器寻址"><a href="#寄存器寻址" class="headerlink" title="寄存器寻址"></a>寄存器寻址</h2><p>操作数的值在寄存器中，指令中的地址码指出的是寄存器编号，指令执行时直接取出寄存器值操作。</p>
+<h2 id="立即寻址"><a href="#立即寻址" class="headerlink" title="立即寻址"></a>立即寻址</h2><p>立即寻址指令中的操作码字段后面的地址码部分就是操作数本身，也就是说，数据就包含在指令当中，取出指令也就取出了可以立即使用的操作数（立即数）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">SUBS R0,R0,#1</div><div class="line">MOV R0,#0xFF00</div></pre></td></tr></table></figure>
+<p>立即数要以“#”为前缀。</p>
+<h2 id="寄存器偏移寻址"><a href="#寄存器偏移寻址" class="headerlink" title="寄存器偏移寻址"></a>寄存器偏移寻址</h2><p>寄存器偏移寻址是ARM指令集特有的寻址方式，当第2操作数是寄存器偏移方式时，第2个寄存器操作数在与第1个操作数结合之前，进行移位操作。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">MOV R0,R2,LSL #3        ;R2的值左移3位，结果放入R0</div><div class="line">ANDS R1,R1,R2,LSL R3    ;R2的值左移R3位，然后与R1相与，结果放入R1</div></pre></td></tr></table></figure>
+<p>可采用的移位操作如下：</p>
+<p>LSL: 逻辑左移（Logical Shift Left）,寄存器中字的底端空出的位补0</p>
+<p>LSR: 逻辑右移（Logical Shift Right）,寄存器的高端空出位补0</p>
+<p>ASR: 算术右移（Arithmetic Shift Right）,移位过程中保持符号位不变，即如果源操作数为正数，则字的高端空出的位补0，否则补1</p>
+<p>ROR: 循环右移(Rotate Right),由字的低端移出的位填入字的高端空出的位</p>
+<p>RRX:带拓展标志的循环右移(Rotate Right Extended By 1place),操作数右移一位，高端空出的位用原C标志值填充</p>
+<h2 id="寄存器间接寻址"><a href="#寄存器间接寻址" class="headerlink" title="寄存器间接寻址"></a>寄存器间接寻址</h2><p>寄存器间接寻址指令中的地址码给出的是一个通用的寄存器编号，所需要的操作数保存在寄存器指定地址的存储单元中，即寄存器为操作数的地址指针</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">LDR R1,[R2]     ;将R2中的数值作为地址，取出此地址中的数据保存在R1中</div><div class="line">SWP R1,R1,[R2]      ;将R2中的数值作为地址，取出此地址中的数值与R1中的值交换</div></pre></td></tr></table></figure>
+<h2 id="基址寻址"><a href="#基址寻址" class="headerlink" title="基址寻址"></a>基址寻址</h2><p>基址寻址是将基址寄存器的内容与指令中给出的偏移量相加，形成操作数的有效地址，基址寻址用于访问基址附近的存储单元，常用于查表，数组操作，功能部件寄存器访问等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">LDR R2,[R3,#0x0F]      </div><div class="line">STR R1,[R0,#-2]</div></pre></td></tr></table></figure>
+<h2 id="多寄存器寻址"><a href="#多寄存器寻址" class="headerlink" title="多寄存器寻址"></a>多寄存器寻址</h2><p>多寄存器寻址就是一次可以传送几个寄存器的值，允许一条指令传送16个寄存器的任何子集或者所有寄存器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">LDMIA R1!,&#123;R2-R7,R12&#125;   ;将R1单元中的数据读出到R2-R7,R12,R1自动加1</div><div class="line">STMIA R0!,&#123;R3-R6,R10&#125;   ;将R3-R6,R10中的数据保存到R0指向的地址，R0自动加1</div></pre></td></tr></table></figure>
+<p>使用多寄存器寻址指令时，寄存器子集的顺序由小到大的顺序排列，连续的寄存器可用“-”连接，否则，用“,”分割书写。</p>
+<h2 id="堆栈寻址"><a href="#堆栈寻址" class="headerlink" title="堆栈寻址"></a>堆栈寻址</h2><p>堆栈是按照特定顺序进行存取的存储区，操作顺序分为“后进先出”和“先进后出”，堆栈寻址时隐含的，它使用一个专门的寄存器（堆栈指针）指向一块存储区域（堆栈），指针所指向的存储单元就是堆栈的栈顶。存储器堆栈可分为两种：</p>
+<p><strong> 向上生长: </strong>向高地址方向生长，称为递增堆栈<br><strong> 向下生长: </strong>向低地址方向生长，称为递减堆栈</p>
+<p>堆栈指针指向最后压入的有效数据项，称为满堆栈；堆栈指针指向下一个要放入的空位置，称为空堆栈。这样就有四种类型的堆栈表示递增和递减的满堆栈和空堆栈的各种组合。</p>
+<p>满递增：堆栈通过增大存储器的地址向上增长，堆栈指针指向含有有效数据项的最高地址。指令如LDMFA、STMFA等。</p>
+<p>空递增：堆栈通过增大存储器的地址向上增长，堆栈指针指向堆栈上的第一个空位置。指令如LDMEA,STMEA等。</p>
+<p>满递减：堆栈通过减小存储器的地址向下增长，堆栈指针指向内含有有效数据的最低地址。指令如LDMFD，STMFD等。</p>
+<p>空递减：堆栈通过减小存储器的地址向下增长，堆栈指针指向堆栈下的第一个空位置。指令如LDMED，STMED等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">STMFD SP!,&#123;R1-R7,LR&#125;    ;将R1-R7,LR入栈。满递减堆栈</div><div class="line">LDMFD SP!,&#123;R1-R7,LR&#125;    ;数据出栈，满递减堆栈</div></pre></td></tr></table></figure>
+<h2 id="块拷贝寻址"><a href="#块拷贝寻址" class="headerlink" title="块拷贝寻址"></a>块拷贝寻址</h2><p>多寄存器传送指令用于一块数据从存储器的某一位置拷贝到另一位置。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">STMIA R0!,&#123;R1-R7&#125;   ;将R1-R7的数据保存到存储器中，存储器指针在保存第一个值后增加，增长方向为向上增长。</div></pre></td></tr></table></figure>
+<h2 id="相对寻址"><a href="#相对寻址" class="headerlink" title="相对寻址"></a>相对寻址</h2><p>相对寻址是基址寻址的一种变通，由程序计数器PC提供基准地址，指令中的地址码字段作为偏移量，两者相加后得到的地址即为操作数的有效地址。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h1 id=&quot;ARM-处理器寻址方式&quot;&gt;&lt;a href=&quot;#ARM-处理器寻址方式&quot; class=&quot;headerlink&quot; title=&quot;ARM 处理器寻址方式&quot;&gt;&lt;/a&gt;ARM
+    
+    </summary>
+    
+    
+      <category term="ARM" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/ARM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>开始嵌入式linux学习</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/09/23/startEmbeded/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/09/23/startEmbeded/</id>
+    <published>2016-09-23T09:05:55.000Z</published>
+    <updated>2016-09-29T07:59:38.549Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>从事单片机开发算起来也有快三年了，从慢慢摸索起步，到正儿八经的做项目，接国家课题，在单片机上花了很多功夫。期间做过简单的智能排气扇，也做过高大上的从下位机到上位机全部自己包办的国家级项目“楼宇安防系统”，单片机也从51到430再到ARM，我想我应该算是一合格的单片机开发者了吧。</p>
+<p>一直是裸机开发，对操作系统那块一直没有深入学习，只研究过freeRTOS这个实时系统，而且还没有用在实际开发中。最近很想玩玩操作系统，而且我希望以后进入物联网行业，对于物联网来说，我觉得跑系统是在是太有必要了，所以，打算从今儿开始，花一个月(应该不短吧)学习嵌入式linux，从裸机开发过渡到操作系统下的嵌入式开发上。</p>
+<p>一个月以后，回头再看今天写下的话，希望我已经是个可以从事嵌入式linux开发的程序猿了^_^</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;从事单片机开发算起来也有快三年了，从慢慢摸索起步，到正儿八经的做项目，接国家课题，在单片机上花了很多功夫。期间做过简单的智能排气扇，也做过高大上的从下位机到上位机全部自己包办
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>可以间接消抖的按键长按短按识别</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/09/19/keyLongOrShort/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/09/19/keyLongOrShort/</id>
+    <published>2016-09-18T16:29:07.000Z</published>
+    <updated>2016-09-18T09:09:57.758Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>按键按下时触发按键计时，按键释放结束计时，计时时间T<sub>key</sub> &lt; T<sub>short</sub> 时，判为短按。T<sub>key</sub> &gt; T<sub>long</sub>时，判为长按。按键在触发时需要消除抖动，抖动本质上也是一次极短的短按，因此可以根据短按时间来消除抖动。定时器定时扫描端口，源代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (D_keyDown())                       </div><div class="line">&#123;</div><div class="line">    <span class="keyword">if</span> (x_key.keyTmCnt &lt; D_maxCntNum)</div><div class="line">    &#123;</div><div class="line">        x_key.keyTmCnt++;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">if</span> (x_key.keyTmCnt &gt;= D_timeShortKey)    <span class="comment">/* 大于D_minTimeFilter判为有效按键,短按 */</span></div><div class="line">    &#123;</div><div class="line">        x_key.shortKeyFlag = D_TRUE;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">if</span> (x_key.keyTmCnt &gt;= D_timeLongKey)     <span class="comment">/* 长按 */</span></div><div class="line">    &#123;</div><div class="line">        x_key.keyState = D_keyPushLong;</div><div class="line">        <span class="keyword">if</span> (x_key.shortKeyFlag == D_TRUE)</div><div class="line">        &#123;</div><div class="line">            x_key.shortKeyFlag = D_FALSE;    <span class="comment">/* 清楚短按标志，防止误触发，很重要 */</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"><span class="keyword">else</span></div><div class="line">&#123;</div><div class="line">    x_key.keyTmCnt = <span class="number">0</span>;</div><div class="line">    <span class="keyword">if</span> (x_key.shortKeyFlag == D_TRUE)       </div><div class="line">    &#123;</div><div class="line">        x_key.shortKeyFlag = D_FALSE;</div><div class="line">        x_key.keyState = D_keyPushShort;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;按键按下时触发按键计时，按键释放结束计时，计时时间T&lt;sub&gt;key&lt;/sub&gt; &amp;lt; T&lt;sub&gt;short&lt;/sub&gt; 时，判为短按。T&lt;sub&gt;key&lt;/sub&gt; 
+    
+    </summary>
+    
+      <category term="单片机" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/%E5%8D%95%E7%89%87%E6%9C%BA/"/>
+    
+    
+      <category term="按键识别" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/%E6%8C%89%E9%94%AE%E8%AF%86%E5%88%AB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>freeRTOS中文文档</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/29/freeRTOS-CN/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/29/freeRTOS-CN/</id>
+    <published>2016-08-29T14:36:05.000Z</published>
+    <updated>2017-04-06T00:48:19.000Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p><center><h1> freeRTOS中文文档 V0.0.1 <h1><center></center></h1></h1></center></p>
+<h2 id="文档由来"><a href="#文档由来" class="headerlink" title="文档由来"></a>文档由来</h2><p>因为最近在学习freeRTOS，官方没有中文站点，另外由于服务器原因，<a href="">freeRTOS.net</a>这个中文站点已经很久没法访问了。因此索性边学边翻译，方便自己学习的同时，为国内的小伙伴们做些点点贡献。因水平有限，其中难免会出现翻译不准确的地方，欢迎斧正。</p>
+<h2 id="文档地址"><a href="#文档地址" class="headerlink" title="文档地址"></a>文档地址</h2><p><a href="http://www.xn--4gqa63c686ta68iba.ren/freeRTOS/">freeRTOS中文文档</a></p>
+<h2 id="进度记录"><a href="#进度记录" class="headerlink" title="进度记录"></a>进度记录</h2><ul>
+<li>2016.09.09 进阶部分完成</li>
+<li>2016.08.29 软件定时器，完成入门部分</li>
+<li>2016.08.28 通信机制和事件组</li>
+<li>2016.08.26 任务与协程</li>
+<li>2016.08.25 freeRTOS简介</li>
+<li>2016.08.25 创建</li>
+</ul>
+<h2 id="项目托管"><a href="#项目托管" class="headerlink" title="项目托管"></a>项目托管</h2><p><a href="https://github.com/tangguocheng/freeRTOS_Document" target="_blank" rel="external">GitHub</a></p>
+<p><a href="http://www.tgcjin.xin/freeRTOS/" target="_blank" rel="external">个人博客</a></p>
+<h2 id="不足之处"><a href="#不足之处" class="headerlink" title="不足之处"></a>不足之处</h2><p>因为原版英文中有很多专业性的描述，并且这个翻译也是在一边学一边记录的过程下产生的，有些理解的不透彻的地方，我会直接贴出英文原文，方便后期再仔细斟酌如何翻译，即使如此，文中仍然可能(甚至是肯定的)会出现一些片面的、不准确的翻译。因此，这个中文文档只能作为一个参考，英文能力好的，还是推荐阅读英文原版。</p>
+<h2 id="进度安排"><a href="#进度安排" class="headerlink" title="进度安排"></a>进度安排</h2><p>因为还在工作，无法保证进度，不定时更新。见谅。可关注我的<a href="www.tgcjin.xin">个人博客</a>，除了托管在gitHub上，博客上也会有一份备份。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="wwww.freertos.org">freeRTOS官网</a></li>
+</ul>
+<h2 id="license"><a href="#license" class="headerlink" title="license"></a>license</h2><p>再次声明，虽然很多地方增加了自己的理解和为了方便理解使用更加形象的描述，但是所有内容仍然非原创，全部从官方英文站点翻译整理而来，而此翻译文档遵循以下协议：</p>
+<div align="center"><a rel="external" href="http://creativecommons.org/licenses/by/4.0/" target="_blank"><img alt="知识共享许可协议" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>本作品采用<a rel="external" href="http://creativecommons.org/licenses/by/4.0/" target="_blank">知识共享署名 4.0 国际许可协议</a>进行许可。</div>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;&lt;center&gt;&lt;h1&gt; freeRTOS中文文档 V0.0.1 &lt;h1&gt;&lt;center&gt;&lt;/center&gt;&lt;/h1&gt;&lt;/h1&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;h2 id=&quot;文
+    
+    </summary>
+    
+    
+      <category term="freeRTOS 中文文档" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/freeRTOS-%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CSharp 定义类成员关键字</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/22/CSharpKeyWords/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/22/CSharpKeyWords/</id>
+    <published>2016-08-22T14:36:05.000Z</published>
+    <updated>2016-08-29T02:07:31.704Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h2 id="定义字段："><a href="#定义字段：" class="headerlink" title="定义字段："></a>定义字段：</h2><p><code>public</code>成员可以由任何代码访问。<br><code>private</code>成员只能由类中的代码访问（默认）。<br><code>internal</code>成员只能由定义它的程序集（内部）的代码访问 。<br><code>protected</code>成员只能由类货派生类中的代码访问。<br><em><code>internal protected</code>可以一起使用，表示仅能由项目中的派生类访问</em><br><code>static</code> </p>
+<ol>
+<li>用在类里的属性、方法前面:<br> 这样的静态属性与方法不需要创建实例就能访问，通过类名或对象名都能访问它，静态属性、方法只有“一份”：即如果一个类新建有N个对象，这N 个对象只有同一个静态属性与方法；<strong>可以用来作为全局变量在不同窗口间完成数据共享</strong></li>
+<li>方法内部的静态变量：<br>方法内部的静态变量，执行完静态变量值不消失，再次执行此对象的方法时，值仍存在，它不是在栈中分配的，是在静态区分析的， 这是与局部变量最大的区别；</li>
+</ol>
+<h2 id="定义方法："><a href="#定义方法：" class="headerlink" title="定义方法："></a>定义方法：</h2><p><code>virtual</code>方法可以重写<br><code>abstract</code>方法必须在非抽象的派生类中重写（只用于抽象类中）<br><code>override</code>方法重写了一个基类方法（基类方法必须是可重写的方法，如果重写方法，就必须使用该关键字）<br><code>extern</code>方法定义放在其他地方<br><code>sealed</code>封闭，不允许派生类重写</p>
+<h2 id="定义属性："><a href="#定义属性：" class="headerlink" title="定义属性："></a>定义属性：</h2><p>与定义字段类似，但是需要定义访问器，通过<code>get set</code>关键字定义</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h2 id=&quot;定义字段：&quot;&gt;&lt;a href=&quot;#定义字段：&quot; class=&quot;headerlink&quot; title=&quot;定义字段：&quot;&gt;&lt;/a&gt;定义字段：&lt;/h2&gt;&lt;p&gt;&lt;code&gt;pu
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>TTL电平,CMOS电平,OC门,OD门基础知识</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/09/TTL-CMOS/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/09/TTL-CMOS/</id>
+    <published>2016-08-08T18:10:05.000Z</published>
+    <updated>2016-08-08T10:38:43.747Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>转载: <a href="http://blog.csdn.net/qq258711519/article/details/10957253" target="_blank" rel="external">TTL电平,CMOS电平,OC门,OD门基础知识</a></p>
+<h2 id="TTL"><a href="#TTL" class="headerlink" title="TTL"></a>TTL</h2><p>TTL集成电路的主要型式为晶体管－晶体管逻辑门（transistor-transistor logic gate），TTL大部分都采用5V电源。</p>
+<ol>
+<li>输出高电平Uoh和输出低电平Uol<br> Uoh≥2.4V,Uol≤0.4V</li>
+<li>输入高电平和输入低电平<br> Uih≥2.0V，Uil≤0.8V</li>
+</ol>
+<h2 id="CMOS"><a href="#CMOS" class="headerlink" title="CMOS"></a>CMOS</h2><p>CMOS电路是电压控制器件，输入电阻极大，对于干扰信号十分敏感，因此不用的输入端不应开路，接到地或者电源上。CMOS电路的优点是噪声容限较宽，静态功耗很小。</p>
+<ol>
+<li><p>输出高电平Uoh和输出低电平Uol<br> Uoh≈VCC，Uol≈GND</p>
+</li>
+<li><p>输入高电平Uoh和输入低电平Uol<br> Uih≥0.7VCC,Uil≤0.2VCC （VCC为电源电压，GND为地）</p>
+</li>
+</ol>
+<p>从上面可以看出:<br>在同样5V电源电压情况下，COMS电路可以直接驱动TTL，因为CMOS的输出高电平大于2.0V,输出低电平小于0.8V；而TTL电路则不能直接 驱动CMOS电路，TTL的输出高电平为大于2.4V，如果落在2.4V～3.5V之间，则CMOS电路就不能检测到高电平，低电平小于0.4V满足要 求，所以在TTL电路驱动COMS电路时需要加上拉电阻。如果出现不同电压电源的情况，也可以通过上面的方法进行判断。<br>如果电路中出现3.3V的COMS电路去驱动5V CMOS电路的情况，如3.3V单片机去驱动74HC,这种情况有以下几种方法解决，最简单的就是直接将74HC换成74HCT（74系列的输入输出在下 面有介绍）的芯片，因为3.3V CMOS 可以直接驱动5V的TTL电路；或者加电压转换芯片；还有就是把单片机的I/O口设为开漏，然后加上拉电阻到5V，这种情况下得根据实际情况调整电阻的大 小，以保证信号的上升沿时间。</p>
+<h2 id="74系列简介"><a href="#74系列简介" class="headerlink" title="74系列简介"></a>74系列简介</h2><p>74系列可以说是我们平时接触的最多的芯片，74系列中分为很多种，而我们平时用得最多的应该是以下几种：74LS，74HC，74HCT这三种，这三种系列在电平方面的区别如下：</p>
+<table>
+<thead>
+<tr>
+<th>型号</th>
+<th style="text-align:center">输入电平</th>
+<th style="text-align:right">输出电平</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>74LS</td>
+<td style="text-align:center">TTL电平</td>
+<td style="text-align:right">TTL电平</td>
+</tr>
+<tr>
+<td>74HC</td>
+<td style="text-align:center">COMS电平</td>
+<td style="text-align:right">COMS电平</td>
+</tr>
+<tr>
+<td>74HCT</td>
+<td style="text-align:center">TTL电平</td>
+<td style="text-align:right">COMS电平</td>
+</tr>
+</tbody>
+</table>
+<h2 id="TTL和CMOS电平"><a href="#TTL和CMOS电平" class="headerlink" title="TTL和CMOS电平"></a>TTL和CMOS电平</h2><h3 id="TTL电平-什么是TTL电平"><a href="#TTL电平-什么是TTL电平" class="headerlink" title="TTL电平(什么是TTL电平)"></a>TTL电平(什么是TTL电平)</h3><p>输出高电平&gt;2.4V,输出低电平<0.4v。在室温下，一般输出高电平是3.5v，输出低电平是0.2v。最小输入高电平和低电平：输入高电平>=2.0V，输入低电平&lt;=0.8V，噪声容限是0.4V。</0.4v。在室温下，一般输出高电平是3.5v，输出低电平是0.2v。最小输入高电平和低电平：输入高电平></p>
+<h3 id="CMOS电平"><a href="#CMOS电平" class="headerlink" title="CMOS电平"></a>CMOS电平</h3><p>“1”逻辑电平电压接近于电源电压，”0”逻辑电平接近于0V。而且具有很宽的噪声容限。</p>
+<h3 id="电平转换电路"><a href="#电平转换电路" class="headerlink" title="电平转换电路"></a>电平转换电路</h3><p>因为TTL和COMS的高低电平的值不一样（ttl 5v&lt;＝＝&gt;cmos 3.3v），所以互相连接时需要电平的转换：就是用两个电阻对电平分压，没有什么高深的东西。</p>
+<h3 id="OC门"><a href="#OC门" class="headerlink" title="OC门"></a>OC门</h3><p>即集电极开路门电路，OD门，即漏极开路门电路，必须外界上拉电阻和电源才能将开关电平作为高低电平用。否则它一般只作为开关大电压和大电流负载，所以又叫做驱动门电路。</p>
+<h3 id="TTL和COMS电路比较"><a href="#TTL和COMS电路比较" class="headerlink" title="TTL和COMS电路比较"></a>TTL和COMS电路比较</h3><ul>
+<li>TTL电路是电流控制器件，而CMOS电路是电压控制器件。 </li>
+<li>TTL电路的速度快，传输延迟时间短(5-10ns)，但是功耗大。COMS电路的速度慢，传输延迟时间长(25-50ns),但功耗低。COMS电路本身的功耗与输入信号的脉冲频率有关，频率越高，芯片集越热，这是正常现象。 </li>
+<li>COMS电路的锁定效应：<br>  COMS电路由于输入太大的电流，内部的电流急剧增大，除非切断电源，电流一直在增大。这种效应就是锁定效应。当产生锁定效应时，COMS的内部电流能达到40mA以上，很容易烧毁芯片。<br>  防御措施： </li>
+<li>在输入端和输出端加钳位电路，使输入和输出不超过不超过规定电压。 </li>
+<li>芯片的电源输入端加去耦电路，防止VDD端出现瞬间的高压。 </li>
+<li>在VDD和外电源之间加限流电阻，即使有大的电流也不让它进去。 </li>
+<li>当系统由几个电源分别供电时，开关要按下列顺序：开启时，先开启COMS路得电 源，再开启输入信号和负载的电源；关闭时，先关闭输入信号和负载的电源，再关闭COMS电路的电源。</li>
+</ul>
+<h3 id="COMS电路的使用注意事项"><a href="#COMS电路的使用注意事项" class="headerlink" title="COMS电路的使用注意事项"></a>COMS电路的使用注意事项</h3><ul>
+<li>COMS电路时电压控制器件，它的输入总抗很大，对干扰信号的捕捉能力很强。所以，不用的管脚不要悬空，要接上拉电阻或者下拉电阻，给它一个恒定的电平。 </li>
+<li>输入端接低内阻的信号源时，要在输入端和信号源之间要串联限流电阻，使输入的电流限制在1mA之内。 </li>
+<li>当接长信号传输线时，在COMS电路端接匹配电阻。 </li>
+<li>当输入端接大电容时，应该在输入端和电容间接保护电阻。电阻值为R=V0/1mA.V0是外界电容上的电压。 </li>
+<li>COMS的输入电流超过1mA，就有可能烧坏COMS。</li>
+</ul>
+<h3 id="TTL门电路中输入端负载特性-输入端带电阻特殊情况的处理"><a href="#TTL门电路中输入端负载特性-输入端带电阻特殊情况的处理" class="headerlink" title="TTL门电路中输入端负载特性(输入端带电阻特殊情况的处理)"></a>TTL门电路中输入端负载特性(输入端带电阻特殊情况的处理)</h3><ul>
+<li>悬空时相当于输入端接高电平。因为这时可以看作是输入端接一个无穷大的电阻。 </li>
+<li>在门电路输入端串联10K电阻后再输入低电平，输入端出呈现的是高电平而不是低电平。因为由TTL门电路的输入端负载特性可知，只有在输入端接的串联电阻小于910欧时，它输入来的低电平信号才能被门电路识别出来，串联电阻再大的话输入端就一直呈现高电平。这个一定要注意。COMS门电路就不用考虑这些了。</li>
+</ul>
+<p>TTL电路有集电极开路OC门，MOS管也有和集电极对应的漏极开路的OD门，它的输出就叫做开漏输出。OC门在截止时有漏电流输出，那就是漏电流，为什么有漏电流呢？那是因为当三极管截止的时候，它的基极电流约等于0，但是并不是真正的为0，经过三极管的集电极的电流也就不是真正的 0，而是约0。而这个就是漏电流。</p>
+<p>开漏输出：OC门的输出就是开漏输出；OD门的输出也是开漏输出。它可以吸收很大的电流，但是不能向外输出的电流。所以，为了能输入和输出电流，它使用的时候要跟电源和上拉电阻一齐用。OD门一般作为输出缓冲/驱动器、电平转换器以及满足吸收大负载电流的需要。</p>
+<h3 id="什么叫做图腾柱，它与开漏电路有什么区别"><a href="#什么叫做图腾柱，它与开漏电路有什么区别" class="headerlink" title="什么叫做图腾柱，它与开漏电路有什么区别"></a>什么叫做图腾柱，它与开漏电路有什么区别</h3><p>TTL集成电路中，输出有接上拉三极管的输出叫做图腾柱输出，没有的叫做OC门。因为TTL就是一个三级关，图腾柱也就是两个三级管推挽相连。所以推挽就是图腾。一般图腾式输出，高电平400UA，低电平8MA<br>CMOS 器件不用的输入端必须连到高电平或低电平, 这是因为 CMOS 是高输入阻抗器件, 理想状态是没有输入电流的. 如果不用的输入引脚悬空, 很容易感应到干扰信号, 影响芯片的逻辑运行, 甚至静电积累永久性的击穿这个输入端, 造成芯片失效.另外, 只有 4000 系列的 CMOS 器件可以工作在15伏电源下, 74HC, 74HCT 等都只能工作在 5伏电源下, 现在已经有工作在 3伏和 2.5伏电源下的 CMOS 逻辑电路芯片了.</p>
+<p>CMOS逻辑电平范围比较大，范围在3～15V，比如4000系列当5V供电时，输出在4.6以上为高电平，输出在0.05V以下为低电平。输入在3.5V以上为高电平，输入在1.5V以下为低电平。<br>而对于TTL芯片，供电范围在0～5V，常见都是5V，如74系列5V供电，输出在2.7V以上为高电平，输出在 0.5V以下为低电平，输入在2V以上为高电平，在0.8V以下为低电平。因此，CMOS电路与 TTL电路就有一个电平转换的问题，使两者电平域值能匹配。<br>有关逻辑电平的一些概念 ：<br>要了解逻辑电平的内容，首先要知道以下几个概念的含义：</p>
+<p>输入高电平（Vih）：保证逻辑门的输入为高电平时所允许的最小输入高电平，当输入电平高于Vih时，则认为输入电平为高电平。<br>输入低电平（Vil）：保证逻辑门的输入为低电平时所允许的最大输入低电平，当输入电平低于Vil时，则认为输入电平为低电平。<br>输出高电平（Voh）：保证逻辑门的输出为高电平时的输出电平的最小值，逻辑门的输出为高电平时的电平值都必须大于此Voh。<br>输出低电平（Vol）：保证逻辑门的输出为低电平时的输出电平的最大值，逻辑门的输出为低电平时的电平值都必须小于此Vol。<br>阀值电平(Vt)：数字电路芯片都存在一个阈值电平，就是电路刚刚勉强能翻转动作时的电平。它是一个界于Vil、Vih之间的电压值，对于CMOS电路 的阈值电平，基本上是二分之一的电源电压值，但要保证稳定的输 出，则必须要求输入高电平&gt; Vih，输入低电平<vil，而如果输入电平在阈值上下，也就是vil～vih这个区域，电路的输出会处于不稳定状态。 对于一般的逻辑电平，以上参数的关系如下：="" voh=""> Vih &gt; Vt &gt; Vil &gt; Vol<br>    Ioh：逻辑门输出为高电平时的负载电流（为拉电流）。<br>    Iol：逻辑门输出为低电平时的负载电流（为灌电流）。<br>    Iih：逻辑门输入为高电平时的电流（为灌电流）。<br>    Iil：逻辑门输入为低电平时的电流（为拉电流）。</vil，而如果输入电平在阈值上下，也就是vil～vih这个区域，电路的输出会处于不稳定状态。></p>
+<p>门电路输出极在集成单元内不接负载电阻而直接引出作为输出端，这种形式的门称为开路门。开路的TTL、CMOS、ECL门分别称为集电极开路（OC）、 漏极开路（OD）、发射极开路（OE），使用时应审查是否接上拉电阻（OC、OD门）或下拉电阻（OE门），以及电阻阻值是否合适。对于集电极开路 （OC）门，其上拉电阻阻值RL应满足下面条件：</p>
+<pre><code>- RL &lt; （VCC－Voh）/（n*Ioh＋m*Iih）
+- RL &gt; （VCC－Vol）/（Iol＋m*Iil）
+</code></pre><p>其中n：线与的开路门数；m：被驱动的输入端数。</p>
+<h3 id="常用的逻辑电平"><a href="#常用的逻辑电平" class="headerlink" title="常用的逻辑电平"></a>常用的逻辑电平</h3><p>逻辑电平：有TTL、CMOS、LVTTL、ECL、PECL、GTL；RS232、RS422、LVDS等。<br>其中TTL和CMOS的逻辑电平按典型电压可分为四类：5V系列（5V TTL和5V CMOS）、3.3V系列，2.5V系列和1.8V系列。<br>5V TTL和5V CMOS逻辑电平是通用的逻辑电平。<br>3.3V及以下的逻辑电平被称为低电压逻辑电平，常用的为LVTTL电平。<br>低电压的逻辑电平还有2.5V和1.8V两种。<br>ECL/PECL和LVDS是差分输入输出。<br>RS-422/485和RS-232是串口的接口标准，RS-422/485是差分输入输出，RS-232是单端输入输出。<br>OC门，又称集电极开路（漏极开路）与非门门电路，Open Collector（Open Drain）。</p>
+<h3 id="为什么引入OC门"><a href="#为什么引入OC门" class="headerlink" title="为什么引入OC门"></a>为什么引入OC门</h3><p>实际使用中,有时需要两个或两个以上与非门的输出端连接在同一条导线上，将这些与非门上的数据（状态电平）用同一条导线输送出去。因此，需要一种新的与非门电路–OC门来实现“线与逻辑”。OC门主要用于3个方面:实现与或非逻辑，用做电平转换，用做驱动器。由于OC门电路的输出管的集电极悬空，使用时需外接一个上拉电阻Rp到电源VCC。OC门使用上拉电阻以输出高电平，此外为了加大输出引脚的驱动能力，上拉电阻阻值的选择原则，从降低功耗及芯片的灌电流能力考虑应当足够大；从确保足够的驱动电流考虑应当足够小。线与逻辑，即两个输出端（包括两个以上）直接互连就可以实现“AND”的逻辑功能。在总线传输等实际应用中需要多个门的输出端并联连接使用，而一般 TTL门输出端并不能直接并接使用，否则这些门的输出管之间由于低阻抗形成很大的短路电流（灌电流），而烧坏器件。在硬件上，可用OC门或三态门（ST 门）来实现。用OC门实现线与，应同时在输出端口应加一个上拉电阻。三态门（ST门）主要用在应用于多个门输出共享数据总线，为避免多个门输出同时占用数据总线，这些门的使能信号（EN）中只允许有一个为有效电平（如高电平），由于三态门的输出是推拉式的低阻输出，且不需接上拉（负载）电阻，所以开关速度比OC门快，常用三态门作为输出缓冲器</p>
+<h3 id="什么是OC、OD？"><a href="#什么是OC、OD？" class="headerlink" title="什么是OC、OD？"></a>什么是OC、OD？</h3><p>集电极开路门(集电极开路 OC 或漏极开路 OD)<br>Open-Drain是漏极开路输出的意思，相当于集电极开路(Open-Collector)输出，即TTL中的集电极开路（OC）输出。一般用于线或、线与，也有的用于电流驱动。Open-Drain是对MOS管而言，Open-Collector是对双极型管而言，在用法上没啥区别。</p>
+<p>开漏形式的电路有以下几个特点：</p>
+<ul>
+<li>利用外部电路的驱动能力，减少IC内部的驱动。 或驱动比芯片电源电压高的负载.</li>
+<li>可以将多个开漏输出的Pin，连接到一条线上。通过一只上拉电阻，在不增加任何器件的情况下，形成“与逻辑”关系。这也是I2C，SMBus等总线 判断总线占用状态的原理。如果作为图腾输出必须接上拉电阻。接容性负载时，下降延是芯片内的晶体管，是有源驱动，速度较快；上升延是无源的外接电阻，速度慢。如果要求速度高电阻选择要小，功耗会大。所以负载电阻的选择要兼顾功耗和速度。</li>
+<li>可以利用改变上拉电源的电压，改变传输电平。例如加上上拉电阻就可以提供TTL/CMOS电平输出等。</li>
+<li>开漏Pin不连接外部的上拉电阻，则只能输出低电平。一般来说，开漏是用来连接不同电平的器件，匹配电平用的。</li>
+</ul>
+<p>正常的CMOS输出级是上、下两个管子，把上面的管子去掉就是OPEN-DRAIN了。这种输出的主要目的有两个：电平转换和线与。<br>由于漏级开路，所以后级电路必须接一上拉电阻，上拉电阻的电源电压就可以决定输出电平。这样你就可以进行任意电平的转换了。<br>线与功能主要用于有多个电路对同一信号进行拉低操作的场合，如果本电路不想拉低，就输出高电平，因为OPEN-DRAIN上面的管子被拿掉，高电平是靠外接的上拉电阻实现的。（而正常的CMOS输出级，如果出现一个输出为高另外一个为低时，等于电源短路。）OPEN-DRAIN提供了灵活的输出方式，但是也有其弱点，就是带来上升沿的延时。因为上升沿是通过外接上拉无源电阻对负载充电，所以当电阻选择小时延时就小，但功耗大；反之延时大功耗小。所以如果对延时有要求，则建议用下降沿输出。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;转载: &lt;a href=&quot;http://blog.csdn.net/qq258711519/article/details/10957253&quot; target=&quot;_blank&quot;
+    
+    </summary>
+    
+      <category term="others" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/others/"/>
+    
+    
+      <category term="数字电路" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/%E6%95%B0%E5%AD%97%E7%94%B5%E8%B7%AF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>IIC</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/09/IIC/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/09/IIC/</id>
+    <published>2016-08-08T16:41:15.000Z</published>
+    <updated>2016-09-14T02:45:02.031Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>I<sup>2</sup>C总线是一个多主(从)机、单端、串行通信总线，由飞利浦公司(现在的NXP公司)发明。典型应用是那些短距、低速的应用场合。使用I<sup>2</sup>C是不需要许可费的，但是如果使用NXP提供的地址字段，则需要支付相关费用。</p>
+<h2 id="总线结构"><a href="#总线结构" class="headerlink" title="总线结构"></a>总线结构</h2><p>I<sup>2</sup>C是双向开漏两线制总线，由电阻上拉。SDA是其串行数据线，SCL是总线时钟线，用以提供时钟基准。I<sup>2</sup>C地址空间有7bit和10bit两种，大多数I<sup>2</sup>C提供100kbit/s的通信速率，当然这些都不是标准的一部分，视具体应用而定。鉴于通信帧中包含从机地址、从机应答等信息，实际的数据通信速率会比标称的峰值速率低。</p>
+<p>最大的从机数目由地址空间的位数决定，同时总线上的电容大小总和受到400PF的限制，这限制了实际的通信距离只有几米，同时为了保证高阻抗和低噪声，一个共同的地也是潜在的需求，这会限制线路板的设计。</p>
+<h2 id="物理层"><a href="#物理层" class="headerlink" title="物理层"></a>物理层</h2><p>在物理层上，SCL与SDA都是开漏设计，因此需要一个上拉电阻，将总线拉低来设置逻辑”0”,悬浮时总线被设置成逻辑”1”,是一个线与逻辑，总线上的任何一个设备拉低总线都会导致总线为低，因此当总线为低时，必定有其他设备在使用总线，此时总线为<code>BUSY</code>状态，因此设备可以依靠<code>SDA</code>避免总线冲突。</p>
+<p>当总线空闲时，两条线都是高状态，启动一次传输，可以通过拉低SDA而保持SCL为高发出<code>START</code>信号，释放SDA而保持SCL为高将产生<code>STOP</code>信号。除了<code>START</code>与<code>STOP</code>信号，SDA需保持其状态在SCL为低时，仅当SCL为高时允许切换SDA状态。<br>当SCL为低时，由发送器将SDA状态切换至下一状态，然后主机将SCL设置成高电平，一旦SCL为高，接收器读取SDA状态。</p>
+<h2 id="总线协议-以24Cxx系列EEPROM为例"><a href="#总线协议-以24Cxx系列EEPROM为例" class="headerlink" title="总线协议(以24Cxx系列EEPROM为例)"></a>总线协议(以24Cxx系列EEPROM为例)</h2><p>I<sup>2</sup>C总线的一个典型应用即是EEPROM。24Cxx系列存储芯片的操作主要有读写两类(有些芯片还有擦除操作，因为比较特殊，同时写操作同样可以达到同样目的，在此按下不表)。读写操作使用同样的通信协议:先写从机地址，接着传输数据直到结束信号到来。</p>
+<center><img src="http://obd6jz6in.bkt.clouddn.com/IIC.jpg"></center>
+
+<h3 id="写操作"><a href="#写操作" class="headerlink" title="写操作"></a>写操作</h3><p>首先主机发送开始信号<code>START</code>唤醒总线上的从机，接着发送从机地址(包含写信息)，从机在接收到之后与自己的地址信息进行比较，如果匹配则准备接收数据，否则忽略数据。接着发送需要写入的数据地址及数据，最后发送停止信号。从机在此期间将执行自己的状态机完成数据的接收与写入。<em>(需要注意的是24Cxx系列的EEPROM没法跨页写，也就是对于跨页写入的数据需要执行两次写周期)</em>写入期间，从机一只处在<code>BUSY</code>状态，对外界一切信息均不作响应，写入完成后从机响应ACK信号。</p>
+<h3 id="读操作"><a href="#读操作" class="headerlink" title="读操作"></a>读操作</h3><p>与写操作类似，首先主机发送开始信号<code>START</code>唤醒总线上的从机，接着发送从机地址(包含写信息)，从机在接收到之后与自己的地址信息进行比较，如果匹配则准备接收数据，否则忽略数据。然后再次发送<code>START</code>信号与从机地址(包含读信息)，从机在收到后返回相应数据，主机在收到数据后发送应带<code>ACK</code>或者<code>NCK</code>通知从机接着接收完成或发送下一字节数据，从机发送完最后一个字节数据后，主机可不响应应答信号。</p>
+<h4 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div><div class="line">250</div><div class="line">251</div><div class="line">252</div><div class="line">253</div><div class="line">254</div><div class="line">255</div><div class="line">256</div><div class="line">257</div><div class="line">258</div><div class="line">259</div><div class="line">260</div><div class="line">261</div><div class="line">262</div><div class="line">263</div><div class="line">264</div><div class="line">265</div><div class="line">266</div><div class="line">267</div><div class="line">268</div><div class="line">269</div><div class="line">270</div><div class="line">271</div><div class="line">272</div><div class="line">273</div><div class="line">274</div><div class="line">275</div><div class="line">276</div><div class="line">277</div><div class="line">278</div><div class="line">279</div><div class="line">280</div><div class="line">281</div><div class="line">282</div><div class="line">283</div><div class="line">284</div><div class="line">285</div><div class="line">286</div><div class="line">287</div><div class="line">288</div><div class="line">289</div><div class="line">290</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//函数声明</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">Delay_EEPROM</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">EEPROM_I2C_Init</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">EEPROM_I2C_Start</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">EEPROM_I2C_Stop</span><span class="params">(<span class="keyword">void</span>)</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">EEPROM_ReceiveByte</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">char</span> ACK )</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">EEPROM_SendByte</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">char</span> Data )</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">I2C_Read</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">char</span>* RAM_Addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> EEPROM_Addr, <span class="keyword">unsigned</span> <span class="keyword">char</span> Lenth )</span></span>;</div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">I2C_Write</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">int</span> EEPROM_Addr, <span class="keyword">unsigned</span> <span class="keyword">char</span>* RAM_Addr, <span class="keyword">unsigned</span> <span class="keyword">char</span> Lenth )</span></span>;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：Delay_EEPROM                                             */</span></div><div class="line"><span class="comment">/*  函数功能：延时子程序                                               */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">Delay_EEPROM</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="number">_</span>NOP();<span class="number">_</span>NOP();</div><div class="line">    <span class="number">_</span>NOP();<span class="number">_</span>NOP();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：EEPROM_I2C_Init                                          */</span></div><div class="line"><span class="comment">/*  函数功能：I2C管脚初始化                                            */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">EEPROM_I2C_Init</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line">    IO_EEPROM_SCL_OUT_H;</div><div class="line">    IO_EEPROM_SDA_OUT_H;</div><div class="line">    IO_EEPROM_SCL_DIR_OUT;</div><div class="line">    IO_EEPROM_SDA_DIR_OUT;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：EEPROM_I2C_Start                                         */</span></div><div class="line"><span class="comment">/*  函数功能：启动I2C总线                                              */</span></div><div class="line"><span class="comment">/*  描述：SCL为高电平时，SDA发出下降沿信号                             */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">EEPROM_I2C_Start</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line">    IO_EEPROM_SDA_OUT_H;      	<span class="comment">//SDA=1</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SCL_OUT_H;      	<span class="comment">//SCL=1</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SDA_OUT_L;	        <span class="comment">//SDA=0</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SCL_OUT_L;      	<span class="comment">//SCL=0</span></div><div class="line">    Delay_EEPROM();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：EEPROM_I2C_Stop                                          */</span></div><div class="line"><span class="comment">/*  函数功能：停止I2C总线                                              */</span></div><div class="line"><span class="comment">/*  描述：SCL为高电平时，SDA发出上升沿信号                             */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">EEPROM_I2C_Stop</span><span class="params">(<span class="keyword">void</span>)</span></span></div><div class="line">&#123;</div><div class="line">    IO_EEPROM_SDA_OUT_L;      	<span class="comment">//SDA=0</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SCL_OUT_H;      	<span class="comment">//SCL=1</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SDA_OUT_H;	    <span class="comment">//SDA=1</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    </div><div class="line">    IO_EEPROM_SDA_DIR_OUT;</div><div class="line">    IO_EEPROM_SCL_DIR_OUT;</div><div class="line">    IO_EEPROM_SDA_OUT_H;</div><div class="line">    IO_EEPROM_SCL_OUT_H;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：EEPROM_ReceiveByte                                       */</span></div><div class="line"><span class="comment">/*  函数功能：接收一个字节数据，并发送应答信号                         */</span></div><div class="line"><span class="comment">/*  描述：在SCL高电平时，读取SDA信号                                   */</span></div><div class="line"><span class="comment">/*  输入参数：ACK：应答信号                                            */</span></div><div class="line"><span class="comment">/*  输出参数：读取数据                                                 */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">EEPROM_ReceiveByte</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">char</span> ACK )</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> i,Data=<span class="number">0x00</span>;</div><div class="line">    </div><div class="line">    IO_EEPROM_SDA_DIR_IN;     	   <span class="comment">//SDA输入</span></div><div class="line">    <span class="keyword">for</span>( i=<span class="number">0</span>;i&lt;<span class="number">8</span>;i++ )</div><div class="line">    &#123;</div><div class="line">        IO_EEPROM_SCL_OUT_H;       <span class="comment">//SCL=1</span></div><div class="line">        Delay_EEPROM();</div><div class="line">        Data = Data&lt;&lt;<span class="number">1</span>;</div><div class="line">        <span class="keyword">if</span>( IO_EEPROM_SDA_IN)</div><div class="line">        &#123;</div><div class="line">            Data |= <span class="number">0x01</span>;</div><div class="line">        &#125;</div><div class="line">        IO_EEPROM_SCL_OUT_L;       <span class="comment">//SCL=0</span></div><div class="line">        Delay_EEPROM();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="comment">//发送应答位</span></div><div class="line">    IO_EEPROM_SDA_DIR_OUT;     	   <span class="comment">//SDA输出</span></div><div class="line">    <span class="keyword">if</span>( ACK == <span class="number">1</span> )</div><div class="line">    &#123;</div><div class="line">        IO_EEPROM_SDA_OUT_H;	   <span class="comment">//SDA=1</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span></div><div class="line">    &#123;</div><div class="line">        IO_EEPROM_SDA_OUT_L;	   <span class="comment">//SDA=0</span></div><div class="line">    &#125;</div><div class="line">    IO_EEPROM_SCL_OUT_H;           <span class="comment">//SCL=1</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SCL_OUT_L;           <span class="comment">//SCL=0</span></div><div class="line">    </div><div class="line">    <span class="keyword">return</span> Data;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：EEPROM_SendByte                                          */</span></div><div class="line"><span class="comment">/*  函数功能：发送一个字节数据或地址，并判断应答信号                   */</span></div><div class="line"><span class="comment">/*  描述：在SCL下降沿时，发送SDA信号                                   */</span></div><div class="line"><span class="comment">/*  输入参数：Data：待发送的信息                                       */</span></div><div class="line"><span class="comment">/*  输出参数：0为成功，1为失败                                         */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">EEPROM_SendByte</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">char</span> Data )</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> i,ACK;</div><div class="line">    </div><div class="line">    <span class="keyword">for</span>( i=<span class="number">0</span>;i&lt;<span class="number">8</span>;i++ )</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span>( Data &amp; <span class="number">0x80</span> )</div><div class="line">        &#123;</div><div class="line">            IO_EEPROM_SDA_DIR_IN;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">else</span></div><div class="line">        &#123;</div><div class="line">            IO_EEPROM_SDA_DIR_OUT;</div><div class="line">            IO_EEPROM_SDA_OUT_L;</div><div class="line">        &#125;</div><div class="line">        IO_EEPROM_SCL_OUT_H;      	<span class="comment">//SCL=1</span></div><div class="line">        Delay_EEPROM();</div><div class="line">        Delay_EEPROM();</div><div class="line">        IO_EEPROM_SCL_OUT_L;      	<span class="comment">//SCL=0</span></div><div class="line">        Data=Data&lt;&lt;<span class="number">1</span>;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="comment">//应答位检查</span></div><div class="line">    IO_EEPROM_SDA_DIR_IN;     	<span class="comment">//SDA输入</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    IO_EEPROM_SCL_OUT_H;          	<span class="comment">//SCL=1</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    ACK = IO_EEPROM_SDA_IN;	        <span class="comment">//正常情况ACK信号应该为0</span></div><div class="line">    IO_EEPROM_SCL_OUT_L;          	<span class="comment">//SCL=0</span></div><div class="line">    IO_EEPROM_SDA_DIR_OUT;     	<span class="comment">//SDA输出</span></div><div class="line">    Delay_EEPROM();</div><div class="line">    </div><div class="line">    <span class="keyword">return</span> ACK;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：_E2Pread                                                 */</span></div><div class="line"><span class="comment">/*  函数功能：从EEPROM里读数据                                         */</span></div><div class="line"><span class="comment">/*  输入参数：RAM_Addr：目的地址                                       */</span></div><div class="line"><span class="comment">/*            EEPROM_Addr：源地址                                      */</span></div><div class="line"><span class="comment">/*            Lenth：数据长度                                          */</span></div><div class="line"><span class="comment">/*  输出参数：0为成功，其余为失败                                      */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">I2C_Read</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">char</span>* RAM_Addr, <span class="keyword">unsigned</span> <span class="keyword">int</span> EEPROM_Addr, <span class="keyword">unsigned</span> <span class="keyword">char</span> Lenth )</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> ChipAddr,Addr,ACK,i=<span class="number">0</span>;</div><div class="line">    </div><div class="line">    ClrWdt();</div><div class="line">    EEPROM_I2C_Init();</div><div class="line">    EEPROM_I2C_Start();</div><div class="line">    </div><div class="line">    <span class="comment">//ChipAddr = 0xAE;</span></div><div class="line">    ChipAddr = (EEPROM_ICAddr | ((EEPROM_Addr&gt;&gt;<span class="number">13</span>)&amp;<span class="number">0x06</span>));</div><div class="line">    <span class="keyword">while</span>( i &lt; <span class="number">200</span> )<span class="comment">//判断EEPROM能否正常操作</span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span>( EEPROM_SendByte(ChipAddr) == <span class="number">0</span> )<span class="comment">//发送器件地址</span></div><div class="line">        &#123;</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        EEPROM_I2C_Start();</div><div class="line">        i++;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>( i &gt;= <span class="number">200</span> )</div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span></div><div class="line">        Flag.Error &amp;= ~F_EEPROM_Err;</div><div class="line">    </div><div class="line">    Addr = ((<span class="keyword">unsigned</span> <span class="keyword">char</span>)(EEPROM_Addr&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0x3F</span>);</div><div class="line">    <span class="keyword">if</span>( EEPROM_SendByte(Addr) )<span class="comment">//发送子地址高位</span></div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    Addr = (<span class="keyword">unsigned</span> <span class="keyword">char</span>)EEPROM_Addr;</div><div class="line">    <span class="keyword">if</span>( EEPROM_SendByte(Addr) )<span class="comment">//发送子地址低位</span></div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    EEPROM_I2C_Start();</div><div class="line">    ChipAddr |= <span class="number">0x01</span>;</div><div class="line">    <span class="keyword">if</span>( EEPROM_SendByte(ChipAddr) )<span class="comment">//发送器件地址，读命令</span></div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">while</span>( (Lenth--) &gt; <span class="number">0</span> )</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span>( Lenth != <span class="number">0</span> )</div><div class="line">            ACK = <span class="number">0</span>;</div><div class="line">        <span class="keyword">else</span></div><div class="line">            ACK = <span class="number">1</span>;</div><div class="line">        *RAM_Addr = EEPROM_ReceiveByte(ACK);</div><div class="line">        RAM_Addr++;</div><div class="line">    &#125;</div><div class="line">    EEPROM_I2C_Stop();</div><div class="line">    </div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="comment">/*  函数名称：_E2Pwrite                                                */</span></div><div class="line"><span class="comment">/*  函数功能：往EEPROM里写数据                                         */</span></div><div class="line"><span class="comment">/*  输入参数：EEPROM_Addr：目的地址                                    */</span></div><div class="line"><span class="comment">/*            RAM_Addr：源地址                                         */</span></div><div class="line"><span class="comment">/*            Lenth：数据长度                                          */</span></div><div class="line"><span class="comment">/*  输出参数：0为成功，其余为失败                                      */</span></div><div class="line"><span class="comment">/***********************************************************************/</span></div><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">I2C_Write</span><span class="params">( <span class="keyword">unsigned</span> <span class="keyword">int</span> EEPROM_Addr, <span class="keyword">unsigned</span> <span class="keyword">char</span>* RAM_Addr, <span class="keyword">unsigned</span> <span class="keyword">char</span> Lenth )</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> ChipAddr,Addr,i=<span class="number">0</span>;</div><div class="line">    </div><div class="line">    ClrWdt();</div><div class="line">    EEPROM_I2C_Init();</div><div class="line">    EEPROM_I2C_Start();</div><div class="line">    </div><div class="line">    <span class="comment">//ChipAddr = 0xAE;</span></div><div class="line">    ChipAddr = (EEPROM_ICAddr | ((EEPROM_Addr&gt;&gt;<span class="number">13</span>)&amp;<span class="number">0x06</span>));</div><div class="line">    <span class="comment">//EEPROM在完成一次写入命令后要延迟5到10毫秒，通过连续发器件地址，一旦总线正常，即立刻进行下一次总线操作</span></div><div class="line">    <span class="keyword">while</span>( i &lt; <span class="number">200</span> )<span class="comment">//判断EEPROM能否正常操作</span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span>( EEPROM_SendByte(ChipAddr) == <span class="number">0</span> )<span class="comment">//发送器件地址</span></div><div class="line">        &#123;</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        EEPROM_I2C_Start();</div><div class="line">        i++;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>( i &gt;= <span class="number">200</span> )</div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span></div><div class="line">        Flag.Error &amp;= ~F_EEPROM_Err;</div><div class="line">    </div><div class="line">    Addr = ((<span class="keyword">unsigned</span> <span class="keyword">char</span>)(EEPROM_Addr&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0x3F</span>);</div><div class="line">    <span class="keyword">if</span>( EEPROM_SendByte(Addr) )<span class="comment">//发送子地址高位</span></div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    Addr = (<span class="keyword">unsigned</span> <span class="keyword">char</span>)EEPROM_Addr;</div><div class="line">    <span class="keyword">if</span>( EEPROM_SendByte(Addr) )<span class="comment">//发送子地址低位</span></div><div class="line">    &#123;</div><div class="line">        EEPROM_I2C_Stop();</div><div class="line">        Flag.Error |= F_EEPROM_Err;<span class="comment">//器件不正常</span></div><div class="line">        <span class="keyword">return</span> <span class="number">0xFF</span>;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">do</span></div><div class="line">    &#123;</div><div class="line">        EEPROM_SendByte(*RAM_Addr);</div><div class="line">        RAM_Addr++;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">while</span>( (--Lenth) &gt; <span class="number">0</span> );</div><div class="line">    EEPROM_I2C_Stop();</div><div class="line">    </div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;I&lt;sup&gt;2&lt;/sup&gt;C总线是一个多主(从)机、单端、串行通信总线，由飞利浦公司(现在的NXP公司)发明。典型应用是那些短距、低速的应用场合。使用I&lt;sup&gt;2&lt;/sup
+    
+    </summary>
+    
+      <category term="总线协议" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/%E6%80%BB%E7%BA%BF%E5%8D%8F%E8%AE%AE/"/>
+    
+    
+      <category term="总线协议" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/%E6%80%BB%E7%BA%BF%E5%8D%8F%E8%AE%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>STM8复位(reset)</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/08/STM8-REST/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/08/STM8-REST/</id>
+    <published>2016-08-08T14:12:15.000Z</published>
+    <updated>2016-08-08T08:38:33.102Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>一款芯片，复位的重要性我认为不亚于其他任何一个单元模块。同时，开发固件时，对芯片的复位条件、复位源、复位后的系统状态的掌握直接决定后面系统工作的可靠性。</p>
+<p><center><img src="http://obd6jz6in.bkt.clouddn.com/%E5%A4%8D%E4%BD%8D.jpg"></center></p>
+<h3 id="复位源"><a href="#复位源" class="headerlink" title="复位源"></a>复位源</h3><p>STM8复位源总共是6类，除了外部复位管脚提供的两种复位源(<code>NRST</code>和<code>SWIM REST</code>)，还有上下电(<code>POR\PDR</code>)复位、独立看门狗(<code>IWDG</code>)复位、窗口看门狗(<code>WWDG</code>)复位、非法配置选项复位(<code>ILLOP</code>)。STM8的用户指南里对各个部分的外设的复位状态有明确的说明，例如大部分IO口复位之后都是浮动输入模式，但也有少数例外，使用时应该时刻注意复位状态对系统可能的影响。</p>
+<h3 id="复位状态与正在复位状态"><a href="#复位状态与正在复位状态" class="headerlink" title="复位状态与正在复位状态"></a>复位状态与正在复位状态</h3><p>当复位源触发芯片复位后，芯片将进入一个复位期，这段时间里，芯片处在正在复位状态，完成硬件的初始化(默认复位状态),随后将跳转到复位向量处。在正在复位状态下，因为硬件可能没有复位到”复位状态”，一些管脚的状态值可能会和手册中的”复位值”不同。</p>
+<h3 id="复位管脚NRST"><a href="#复位管脚NRST" class="headerlink" title="复位管脚NRST"></a>复位管脚<code>NRST</code></h3><p>当这个管脚上出现一个不低于300ns的低电平时，将产生复位新号。这个管脚同时可以当做普通IO来使用，以此来提高可利用IO口数量。处于安全考虑，通过向<code>RTS_CR</code>寄存器写入<code>0xD0</code>将复位管家配置成O口，只在复位之后得第一次设置时有效。</p>
+<h3 id="上下电-POR-PDR-复位"><a href="#上下电-POR-PDR-复位" class="headerlink" title="上下电(POR\PDR)复位"></a>上下电(<code>POR\PDR</code>)复位</h3><p>当系统电源V<sub>DD</sub>上的电压从工作电压跌至低于下电阈值时产生下电复位，反之产生上电复位。并且在复位寄存器<code>RST_SR</code>中置起相应标志位。</p>
+<h3 id="窗口看门狗-WWDG-复位"><a href="#窗口看门狗-WWDG-复位" class="headerlink" title="窗口看门狗(WWDG)复位"></a>窗口看门狗(<code>WWDG</code>)复位</h3><p>这个看门狗必须在窗口内喂狗，否则当计数器减至<code>0x3F</code>时产生内部复位。</p>
+<h3 id="独立看门狗-IWDG-复位"><a href="#独立看门狗-IWDG-复位" class="headerlink" title="独立看门狗(IWDG)复位"></a>独立看门狗(<code>IWDG</code>)复位</h3><p>减计数看门狗，设定的时间间隔内不喂狗，产生复位新号。</p>
+<p><em>以上只是一些简单的概要，详细细节见</em> <strong><a href="http://obd6jz6in.bkt.clouddn.com/STM8L%20%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97.pdf" target="_blank" rel="external">STM8L 用户指南</a></strong></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;一款芯片，复位的重要性我认为不亚于其他任何一个单元模块。同时，开发固件时，对芯片的复位条件、复位源、复位后的系统状态的掌握直接决定后面系统工作的可靠性。&lt;/p&gt;
+&lt;p&gt;&lt;ce
+    
+    </summary>
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/STM8/"/>
+    
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/STM8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>STM8内存(memory)</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/08/STM8-Memory/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/08/STM8-Memory/</id>
+    <published>2016-08-08T10:12:15.000Z</published>
+    <updated>2016-08-08T08:36:21.251Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>以低密度flash内存分配为例(高密度和中等密度只是内存分配及大小不同)，下图是内存映射图。</p>
+<p><center><img src="http://obd6jz6in.bkt.clouddn.com/STM8%E4%BD%8E%E5%AF%86%E5%BA%A6Flash.jpg"></center><br>和51单片机一样，STM8也是8位机16位地址总线宽度，设计最大寻址范围也是64Kb，每页128字节，IAP操作以页为单位。整个FLASH被分为数据EEPROM(<code>DATA EEPROM</code>)、配置选项(<code>OPTION BYTES</code>)、代码区(<code>CODE FLASH</code>)。</p>
+<h3 id="数据EEPROM-DATA-EEPROM"><a href="#数据EEPROM-DATA-EEPROM" class="headerlink" title="数据EEPROM(DATA EEPROM)"></a>数据EEPROM(<code>DATA EEPROM</code>)</h3><p>数据EEPROM可以用来存储一些应用数据，如软件版本号、公司或者组织信息、作者信息等等。初始时，为了保证数据安全，在IAP模式下这部分是写保护的。写保护可以通过MASS密码序列解除，此时可向EEPROM中写入数据。</p>
+<h3 id="主程序代码区"><a href="#主程序代码区" class="headerlink" title="主程序代码区"></a>主程序代码区</h3><p>在UBC或者私有代码区(<code>PCODE</code>)里的程序执行完后跳转到存储在这里执行代码。这里一般存的是用户代码。</p>
+<h3 id="配置选项-OPTION-BYTES"><a href="#配置选项-OPTION-BYTES" class="headerlink" title="配置选项(OPTION BYTES)"></a>配置选项(<code>OPTION BYTES</code>)</h3><p>这部分存储的是硬件配置代码，以字节为单位。主要会影响到硬件配置和内存的写保护。这部分的内容可以通过编程器在ICP条件下或者用户代码在IAP条件下改写，<strong>UBC与PCODE不可以更改这部分内容</strong>。</p>
+<h3 id="用户启动代码区-UBC"><a href="#用户启动代码区-UBC" class="headerlink" title="用户启动代码区(UBC)"></a>用户启动代码区(<code>UBC</code>)</h3><p>这个区域里包含用户IAP升级程序和各类中断向量，芯片在复位时会从RESET中断跳转到执行bootloader代码(这部分代码ST官方提供，用户也可以编写自己的bootloader)。UBC无法通过IAP改写，因为UBC拥有一个更强的二级写保护，这个写保护无法通过MASS密码序列解锁。因此更改这部分的代码只能通过ICP模式(使用 SWIM 接口)。通过配置选项(<code>OPTION BYTES</code>)，可以设置UBC的大小(以页为单位)。</p>
+<h3 id="私有代码区-PCODE"><a href="#私有代码区-PCODE" class="headerlink" title="私有代码区(PCODE)"></a><em>私有代码区(<code>PCODE</code>)</em></h3><p>这部分不是所有型号的STM8芯片都存在的，具体是否有这部分，请参阅所使用芯片的datesheet。PCODE用来存放一些用以驱动硬件的私有代码库。可以在ICP模式下通过<code>PCODESIZE</code>配置选项配置其打下，一旦配置完成无法擦除，相应的PCODE区的大小也就固定不可更改了。</p>
+<p><em>以上只是一些简单的概要，详细细节见</em> <strong><a href="http://obd6jz6in.bkt.clouddn.com/STM8L%20%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97.pdf" target="_blank" rel="external">STM8L 用户指南</a></strong></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;以低密度flash内存分配为例(高密度和中等密度只是内存分配及大小不同)，下图是内存映射图。&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;&lt;img src=&quot;http://obd6jz6i
+    
+    </summary>
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/STM8/"/>
+    
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/STM8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>STM8时钟系统(clock)</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/05/STM8-CLOCK/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/05/STM8-CLOCK/</id>
+    <published>2016-08-05T14:12:15.000Z</published>
+    <updated>2016-08-19T08:07:09.489Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h2 id="STM8时钟结构-clock-structure"><a href="#STM8时钟结构-clock-structure" class="headerlink" title="STM8时钟结构(clock structure)"></a>STM8时钟结构(clock structure)</h2><center><img src="http://obd6jz6in.bkt.clouddn.com/STM8%E6%97%B6%E9%92%9F%E7%BB%93%E6%9E%84.jpg" alt="STM8时钟结构"></center>
+
+<h2 id="时钟分类"><a href="#时钟分类" class="headerlink" title="时钟分类"></a>时钟分类</h2><p>STM的时钟设计同时兼顾系统的鲁棒性及低功耗，共提供四类时钟,分别为高速外部时钟<code>HSE</code>、高速内部时钟<code>HSI</code>、低速内部时钟<code>LSI</code>、低速外部时钟<code>LSE</code>。</p>
+<h3 id="高速外部时钟HSE"><a href="#高速外部时钟HSE" class="headerlink" title="高速外部时钟HSE"></a>高速外部时钟<code>HSE</code></h3><p>可由以下两个时钟源产生:</p>
+<ul>
+<li>外部晶体/陶瓷振荡器</li>
+<li>外部用户时钟源（byPass）<br>在外部晶体震荡稳定下来之后外部时钟寄存器<code>CLK_ECKCR</code>中的<code>HSERDY</code>标志位会由硬件置位，用户可查询该标志位判断<code>HSE</code>的状态，另外可通过<code>HSEON</code>位控制<code>HSE</code>的开关。</li>
+</ul>
+<h3 id="高速内部时钟HSI"><a href="#高速内部时钟HSI" class="headerlink" title="高速内部时钟HSI"></a>高速内部时钟<code>HSI</code></h3><ul>
+<li><code>HSI</code>由内部集成的RC振荡器产生的16MHz频率。在系统启动时，由硬件自动将系统时钟源切换为<code>HSI</code>的8分频，也就是系统起始时钟频率为8MHz。<code>HSI</code>具有低功耗、快速的起振时间的特性，但是相比由外部晶体提供时钟源的<code>HSE</code>，精度稍差。</li>
+<li><code>HSI</code>在出厂时是完成过校准的，用户也可以通过<code>CLK_HSICALR</code>寄存器校准<code>HSI</code>。</li>
+<li><code>HSI</code>另外一个特点是作为备用时钟源，当<code>CSS(clock security system)</code>检测到<code>HSE</code>晶体停振，会自动将系统时钟切换到<code>HSI</code>，已保证系统的稳定运行。<br>当设置了<code>FHWU</code>快速唤醒功能时，MCU在从停止状态唤醒时会自动切换到<code>HSI</code>完成快速唤醒。</li>
+</ul>
+<h3 id="低速外部时钟LSE"><a href="#低速外部时钟LSE" class="headerlink" title="低速外部时钟LSE"></a>低速外部时钟<code>LSE</code></h3><p>由外接32768Hz的时钟源提供，主要为RTC提供高精度时钟源。</p>
+<h3 id="低速内部时钟LSI"><a href="#低速内部时钟LSI" class="headerlink" title="低速内部时钟LSI"></a>低速内部时钟<code>LSI</code></h3><p><code>LSI</code>提供38KHz的时钟频率，可以在活跃停机下保持运行，给独立看门狗提供时钟频率。</p>
+<h2 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h2><p>对于工业级产品，对稳定性要求很高，STM8的时钟机制可以提高系统的鲁棒性。<code>CSS</code>在<code>HSE</code>作为系统时钟时会一直处在监控状态，一旦<code>HSE</code>失效，硬件会自动切换到<code>HSI</code>，系统时钟分频系数不变。用户可以通过<code>CSSEN</code>设置<code>CSS</code>使能，一旦设置使能，知道系统复位，<code>CSS</code>将一直存在使能的状态且不可关闭。</p>
+<h2 id="时钟中断"><a href="#时钟中断" class="headerlink" title="时钟中断"></a>时钟中断</h2><p>时钟控制器可以在一定条件下产生如下中断和事件</p>
+<center><img src="http://obd6jz6in.bkt.clouddn.com/%E6%97%B6%E9%92%9F%E4%B8%AD%E6%96%AD.jpg" alt="时钟中断"></center>
+
+<p><em>以上只是简单的概要，详细细节见</em> <strong><a href="http://obd6jz6in.bkt.clouddn.com/STM8L%20%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97.pdf" target="_blank" rel="external">STM8L 用户指南</a></strong> </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h2 id=&quot;STM8时钟结构-clock-structure&quot;&gt;&lt;a href=&quot;#STM8时钟结构-clock-structure&quot; class=&quot;headerlink&quot; t
+    
+    </summary>
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/STM8/"/>
+    
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/STM8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>UART</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/05/UART/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/05/UART/</id>
+    <published>2016-08-05T10:12:15.000Z</published>
+    <updated>2016-08-16T08:18:15.647Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>通用异步收发器(UART)是嵌入式应用中最为常见的一中”总线协议”，之所以将UART归为总线协议中的一种，是因为广义上来讲，它规定了通信双方需要遵循的数据速率、通信格式等规则。即使它很简单，但是因为应用广泛，所以还是很值得去了解UART的相关特点以及实际应用中的一些注意点。</p>
+<h2 id="发送与接收"><a href="#发送与接收" class="headerlink" title="发送与接收"></a>发送与接收</h2><p>UART将字节数据已一个个独立的位按照连续的方式发出，接收方已同样的方式接收并组成原字节数据，发送方与接收方都包含一个移位寄存器(shift register)用来将数据”串行化”或”反串行化。根据通信方式，UART可以分为单工、半双工、双工通信三类。</p>
+<h2 id="数据构成"><a href="#数据构成" class="headerlink" title="数据构成"></a>数据构成</h2><p>UART发送或接收的数据结构：起始位 + 数据位 + 校验位 + 停止位，其中除校验位可选外，其它都是必须项。</p>
+<h3 id="空闲模式"><a href="#空闲模式" class="headerlink" title="空闲模式"></a>空闲模式</h3><p>当总线出于空闲模式时，发送端需要保持高电平，这是电报的历史遗留(保持高电平用以指示通讯线或收发器没有遭到破坏)。<strong>这在利用GPIO软件模拟UART的时候尤其需要注意，如果忽略会导致通信无法实现</strong></p>
+<h3 id="起始位"><a href="#起始位" class="headerlink" title="起始位"></a>起始位</h3><p>每次通信总是已一个逻辑”0”的bit开始，称为起始位。因为在空闲模式总线处于逻辑”1”，当起始位出现时，会产生一个下降沿，容易用来产生唤醒终端，通知接收方即使处理接下来发送的数据。</p>
+<h3 id="数据位"><a href="#数据位" class="headerlink" title="数据位"></a>数据位</h3><p>数据位从5到9位不等，根据实际应用决定，大部分选择8位数据位，即一个字节。</p>
+<h3 id="校验位"><a href="#校验位" class="headerlink" title="校验位"></a>校验位</h3><p>这是可选项，分为奇校验、偶校验、空格校验、标记校验等。奇校验保证数据位与校验位中的”1”的总数为奇数，偶校验则相反。至于空格校验则是校验位为”0”,标记校验为”1”。</p>
+<h3 id="停止位"><a href="#停止位" class="headerlink" title="停止位"></a>停止位</h3><p>与起始位作用相反，标识通信结尾，为逻辑”1”。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;通用异步收发器(UART)是嵌入式应用中最为常见的一中”总线协议”，之所以将UART归为总线协议中的一种，是因为广义上来讲，它规定了通信双方需要遵循的数据速率、通信格式等规则
+    
+    </summary>
+    
+      <category term="总线协议" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/%E6%80%BB%E7%BA%BF%E5%8D%8F%E8%AE%AE/"/>
+    
+    
+      <category term="UART" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/UART/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>STM8通用IO(GPIO)</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/04/STM8-GPIO/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/04/STM8-GPIO/</id>
+    <published>2016-08-04T13:12:15.000Z</published>
+    <updated>2016-08-05T07:35:16.391Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ul>
+<li>每个IO口可单独配置</li>
+<li>输入模式可配：上拉输入、悬浮输入</li>
+<li>输出模式可配：推挽输出、开漏输出</li>
+<li>输入输出数据寄存器独立</li>
+<li>外部中断独立使能</li>
+<li>输出斜率可控用以减小EMC噪声</li>
+<li>管脚复用</li>
+<li>1.6V-VddioMax直接IO状态稳定<a id="more"></a>
+<h2 id="相关寄存器-Register"><a href="#相关寄存器-Register" class="headerlink" title="相关寄存器(Register)"></a>相关寄存器(Register)</h2>主要是6个寄存器<code>DDR、CR1、CR2、ODR、IDR</code>,全部为8位一个字节，每一位对应一个IO口。</li>
+</ul>
+<h3 id="DDR-date-direction-register"><a href="#DDR-date-direction-register" class="headerlink" title="DDR(date direction register)"></a>DDR(date direction register)</h3><p>控制IO口输入输出方向，0-输入模式，1-输出模式。</p>
+<h3 id="CR1-port-control-register-1"><a href="#CR1-port-control-register-1" class="headerlink" title="CR1(port control register #1)"></a>CR1(port control register #1)</h3><ul>
+<li>输入模式<ul>
+<li>0：悬浮输入</li>
+<li>1：输入上拉</li>
+</ul>
+</li>
+<li>输出模式<ul>
+<li>0：伪开漏输出</li>
+<li>1：推挽输出，输出斜率可调(CR2)</li>
+</ul>
+</li>
+</ul>
+<h3 id="CR2-port-control-register-2"><a href="#CR2-port-control-register-2" class="headerlink" title="CR2(port control register #2)"></a>CR2(port control register #2)</h3><ul>
+<li>输入模式<ul>
+<li>0：外部中断禁止</li>
+<li>1：外部中断使能</li>
+</ul>
+</li>
+<li>输出模式<ul>
+<li>0：输出最大速率2MHz，低速模式</li>
+<li>1：输出最大速率10MHz，高速模式</li>
+</ul>
+</li>
+</ul>
+<h3 id="ODR-output-date-register"><a href="#ODR-output-date-register" class="headerlink" title="ODR(output date register)"></a>ODR(output date register)</h3><p>输出寄存器，忘改寄存器写入数据，可改变输出管脚电平状态。</p>
+<h3 id="IDR-input-date-register"><a href="#IDR-input-date-register" class="headerlink" title="IDR(input date register)"></a>IDR(input date register)</h3><p>输入寄存器，读取该寄存器可得到当前管脚电平状态。</p>
+<p><em>以上只是简单的概要，详细细节见</em> <strong><a href="http://obd6jz6in.bkt.clouddn.com/STM8L%20%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97.pdf" target="_blank" rel="external">STM8L 用户指南</a></strong></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;特性&quot;&gt;&lt;a href=&quot;#特性&quot; class=&quot;headerlink&quot; title=&quot;特性&quot;&gt;&lt;/a&gt;特性&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;每个IO口可单独配置&lt;/li&gt;
+&lt;li&gt;输入模式可配：上拉输入、悬浮输入&lt;/li&gt;
+&lt;li&gt;输出模式可配：推挽输出、开漏输出&lt;/li&gt;
+&lt;li&gt;输入输出数据寄存器独立&lt;/li&gt;
+&lt;li&gt;外部中断独立使能&lt;/li&gt;
+&lt;li&gt;输出斜率可控用以减小EMC噪声&lt;/li&gt;
+&lt;li&gt;管脚复用&lt;/li&gt;
+&lt;li&gt;1.6V-VddioMax直接IO状态稳定
+    
+    </summary>
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/STM8/"/>
+    
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/STM8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>STM8概述</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/04/STM8-Summarize/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/04/STM8-Summarize/</id>
+    <published>2016-08-04T11:32:15.000Z</published>
+    <updated>2016-08-08T08:05:27.463Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><blockquote>
+<ul>
+<li>电源电压范围：1.8V-3.6V</li>
+<li>低功耗：<ul>
+<li>五种低功耗模式</li>
+<li>动态功耗：与时钟频率相关 200uA/MHz+330uA</li>
+<li>IO漏电流：50nA</li>
+<li>从停止模式唤醒仅需4.7uS</li>
+</ul>
+</li>
+<li>先进的STM8内核<ul>
+<li>哈佛结构</li>
+<li>可达到16MIPS</li>
+<li>多达40个外部中断源</li>
+</ul>
+</li>
+<li>丰富的外设<ul>
+<li>DMA</li>
+<li>LCD</li>
+<li>RTC</li>
+<li>ADC</li>
+<li>TIMER</li>
+<li>CLOCK MANAGEMENT</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="GPIO"><a href="#GPIO" class="headerlink" title="GPIO "></a><a href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/04/STM8/STM8%E4%B9%8BGPIO/">GPIO </a></h2><h2 id="REST"><a href="#REST" class="headerlink" title="REST "></a><a href="">REST </a></h2><h2 id="CLOCK"><a href="#CLOCK" class="headerlink" title="CLOCK "></a><a href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/05/STM8/STM8%E4%B9%8BCLOCK/">CLOCK </a></h2><h2 id="Memory"><a href="#Memory" class="headerlink" title="Memory "></a><a href="">Memory </a></h2><p>以上只是一些我认为是重点的部分的简单的概要，很多操作都可以通过ST公司提供的库函数完成，这些库函数结构合理使用方便，用户完全可以拿过来使用，因此很多操作的细节了解下就好了，出了BUG知道一个方向去解决，其他的交给库函数吧。<br><em>详细细节见</em> <strong><a href="http://obd6jz6in.bkt.clouddn.com/STM8L%20%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97.pdf" target="_blank" rel="external">STM8L 用户指南</a></strong></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;h2 id=&quot;特性&quot;&gt;&lt;a href=&quot;#特性&quot; class=&quot;headerlink&quot; title=&quot;特性&quot;&gt;&lt;/a&gt;特性&lt;/h2&gt;&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;电
+    
+    </summary>
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/STM8/"/>
+    
+    
+      <category term="STM8" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/STM8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>M-Bus和DLT645-2007通讯协议</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/03/MBusAndDTL645/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/03/MBusAndDTL645/</id>
+    <published>2016-08-03T15:12:15.000Z</published>
+    <updated>2016-08-03T07:54:37.489Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p><code>M-Bus(meter-bus)</code>是一个专用于公共事业仪表的总线结构，《DL/T645-2007多功能电能表通信协议》是发改委发布的一项用于国内电能表数据通信的协议规范，相当于MBus的”汉化版”。</p>
+<h2 id="MBus总线协议帧格式"><a href="#MBus总线协议帧格式" class="headerlink" title="MBus总线协议帧格式"></a>MBus总线协议帧格式</h2><p>|–前导字节–|–帧起始符–|–仪表类型–|–从站地址域–|–控制码–|–数据长度–|–数据域–|–纵向校验码–|–帧结束–|<br>字节格式：8位数据位+1个起始位+1个奇偶校验位+1停止位。传输时，低位在前，高位在后。</p>
+<h3 id="前导字节"><a href="#前导字节" class="headerlink" title="前导字节"></a>前导字节</h3><p>通信前设备发送一定数目的<code>FEH</code>,本质上是物理层的要求，用于唤醒设备和同步，一般是2~4个<code>FE</code>。</p>
+<h3 id="帧起始符"><a href="#帧起始符" class="headerlink" title="帧起始符"></a>帧起始符</h3><p>表示一帧信息的开始，为<code>68H</code>。</p>
+<h3 id="仪表类型"><a href="#仪表类型" class="headerlink" title="仪表类型"></a>仪表类型</h3><p>指示参与通信的从站是那种类型的计量仪表:</p>
+<ul>
+<li>10H~19H: 水表</li>
+<li>20H~29H: 热表</li>
+<li>30H~39H: 燃气表</li>
+</ul>
+<h3 id="地址域"><a href="#地址域" class="headerlink" title="地址域"></a>地址域</h3><p>地址域指示与之通信的从站的地址，由7个字节组成A<sub>0</sub>A<sub>1</sub>A<sub>2</sub>A<sub>3</sub>A<sub>4</sub>A<sub>5</sub>A<sub>6</sub>,每个字节为2为BCD码，其中A<sub>5</sub>A<sub>6</sub>为厂商代码，低地址在前高地址在后，<code>AAH</code>为通配地址，当为<code>AAAAAAAAAAAAAA</code>时，代表广播。</p>
+<h3 id="控制码"><a href="#控制码" class="headerlink" title="控制码"></a>控制码</h3><p>帧信息控制代码，一个字节，字节的低6位代表相应信息的控制码（如<code>000100</code>代表读计量数据），第7位表示从站应答信息（0-正确应答，1-异常信息的应答），第8位表示帧的发送方（0-主站的控制帧，1-从站应答帧）。</p>
+<h3 id="数据长度"><a href="#数据长度" class="headerlink" title="数据长度"></a>数据长度</h3><p>数据域的数据长度。</p>
+<h3 id="数据域"><a href="#数据域" class="headerlink" title="数据域"></a>数据域</h3><p>数据，含义根据控制码及上下文确定。发送方进行加<code>33H</code>处理，接收方进行减<code>33H</code>处理。</p>
+<h3 id="纵向校验码"><a href="#纵向校验码" class="headerlink" title="纵向校验码"></a>纵向校验码</h3><p>从帧起始符开始到校验码之前得所有字节的二进制算术累加和，无进位。</p>
+<h3 id="帧结束符"><a href="#帧结束符" class="headerlink" title="帧结束符"></a>帧结束符</h3><p>表示一帧信息的结束，为<code>68H</code>。</p>
+<h2 id="数据传输"><a href="#数据传输" class="headerlink" title="数据传输"></a>数据传输</h2><ul>
+<li>所有多字节数据域（地址域、数据域）均先传送地位后高位，例如传输数据<code>0x12345678</code>,先发送数据<code>0x78</code>,依次发送<code>0x56</code>、<code>0x34</code>、<code>0x12</code>。</li>
+<li>通讯为半双工通信，每次通信均为主站请求、从站应答。</li>
+<li>字节奇偶校验错误、帧校验错误都代表数据通信异常，丢弃信息帧。</li>
+<li>最长响应时间为<code>Tr = 50ms + 30 * Tbyte</code>,其中<code>Tbyte</code>为传输一个字节所需时间。</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;&lt;code&gt;M-Bus(meter-bus)&lt;/code&gt;是一个专用于公共事业仪表的总线结构，《DL/T645-2007多功能电能表通信协议》是发改委发布的一项用于国内电能表
+    
+    </summary>
+    
+      <category term="总线协议" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/%E6%80%BB%E7%BA%BF%E5%8D%8F%E8%AE%AE/"/>
+    
+    
+      <category term="MBus DL/T645-2007 电能表通信协议" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/MBus-DL-T645-2007-%E7%94%B5%E8%83%BD%E8%A1%A8%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>SPI</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/03/SPI/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/08/03/SPI/</id>
+    <published>2016-08-03T10:12:15.000Z</published>
+    <updated>2016-09-14T05:16:54.062Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>参考链接:</p>
+<ul>
+<li><a href="https://zh.wikipedia.org/zh-cn/SPI" target="_blank" rel="external">wikipedia SPI</a> </li>
+<li><p><a href="http://www.xn--4gqa63c686ta68iba.ren/2016/08/09/IIC/">I<sup>2</sup>C</a></p>
+</li>
+<li><p>SPI与I<sup>2</sup>C总线类似，不同的是I<sup>2</sup>C是半双工，SPI是全双工的数据总线。</p>
+</li>
+<li><p>SPI采用四线制：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">SCLK（Serial Clock）：串行时钟，由主机发出</div><div class="line">MOSI（Master Output,Slave Input）：主机输出从机输入信号，由主机发出</div><div class="line">MISO（Master Input,Slave Output）：主机输入从机输出信号，由从机发出</div><div class="line">SS（Slave Selected）：片选信号，由主机发出，低电平有效</div></pre></td></tr></table></figure>
+</li>
+<li><p>与I<sup>2</sup>C类似，沿接收、沿发送，高低位时数据线保持稳定。</p>
+</li>
+<li>I<sup>2</sup>C采用发送数据中包含地址信息来选择从设备，SPI使用片选信号来选择从设备，因此从标准上来看，I<sup>2</sup>C比SPI的从设备选择更加灵活。</li>
+<li>使用SPI时，需要明确总线时钟极性与相位。根据实际外设需求设置。</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;参考链接:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://zh.wikipedia.org/zh-cn/SPI&quot; target=&quot;_blank&quot; rel=&quot;ex
+    
+    </summary>
+    
+      <category term="总线协议" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/%E6%80%BB%E7%BA%BF%E5%8D%8F%E8%AE%AE/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>如何合理命名你的代码</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/07/28/howToNameYourCode/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/07/28/howToNameYourCode/</id>
+    <published>2016-07-28T15:01:20.000Z</published>
+    <updated>2016-09-14T03:06:54.362Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>文中内容参考自Bob Nystrom的blog。<a href="http://journal.stuffwithstuff.com/2016/06/16/long-names-are-long/" target="_blank" rel="external">原文链接</a><br><a id="more"></a></p>
+<blockquote>
+<p>A name has two goals:</p>
+<pre><code>- It needs to be clear: you need to know what the name refers to.
+- It needs to be precise: you need to know what it does not refer to.
+</code></pre></blockquote>
+<h2 id="遵循最简洁、精确的命名原则"><a href="#遵循最简洁、精确的命名原则" class="headerlink" title="遵循最简洁、精确的命名原则"></a>遵循最<strong>简洁、精确</strong>的命名原则</h2><h3 id="省略那些从变量类型上就可以得知的信息"><a href="#省略那些从变量类型上就可以得知的信息" class="headerlink" title="省略那些从变量类型上就可以得知的信息"></a>省略那些从变量类型上就可以得知的信息</h3><p>这个规则主要用在使用静态类型的语言上，用户(程序员)通常知道一个变量的类型，那么如果此时再在变量的命名中添加关于变量类型的信息无疑是冗余的(<em>不是很赞同，如果是嵌入式开发者，尤其是从事单片机应用开发的程序员，现如今使用的大部分IDE或代码编辑工具对变量的自动补全、提示都支持的不够友好，例如keil。在处理一些变量的时候，知道变量的类型会让程序员知道这个变量占用的内存大小、存放位置，从而更好的去使用它。</em>)<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Bad:</span></div><div class="line">String nameString;</div><div class="line">DockableModelessWindow dockableModelessWindow;</div><div class="line"></div><div class="line"><span class="comment">// Better:</span></div><div class="line">String name;</div><div class="line">DockableModelessWindow window;</div></pre></td></tr></table></figure></p>
+<h3 id="省略那些容易产生歧义的信息"><a href="#省略那些容易产生歧义的信息" class="headerlink" title="省略那些容易产生歧义的信息"></a>省略那些容易产生歧义的信息</h3><p>这点在我以往的命名中是个普遍存在的毛病，例如，声明一个用于存储文件路径的变量，我会命名为<code>string currentUsedFilePath</code>,虽然在一定程度上达到了变量名的自解释的作用，但是会让其他阅读你的程序的人产生误解，到底是current Used File`s Path，还是current Used FilePath(@_@);<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Bad:</span></div><div class="line">finalBattleMostDangerousBossMonster;</div><div class="line">weaklingFirstEncounterMonster;</div><div class="line"></div><div class="line"><span class="comment">// Better:</span></div><div class="line">boss;</div><div class="line">firstMonster;</div></pre></td></tr></table></figure></p>
+<h3 id="省略那些在当前的上下文中可以得到的信息"><a href="#省略那些在当前的上下文中可以得到的信息" class="headerlink" title="省略那些在当前的上下文中可以得到的信息"></a>省略那些在当前的上下文中可以得到的信息</h3><p>这点很好理解，比如你的项目中只用到LCD来完成显示相关信息，用来刷新显示的函数直接命名<code>display</code>和你命名<code>LCDDisplay</code>是一个效果的，但是后者显得会有些冗余，同样，类的成员命名也是一个道理；<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Bad:</span></div><div class="line"><span class="keyword">class</span> AnnualHolidaySale &#123;</div><div class="line">  <span class="keyword">int</span> <span class="number">_</span>annualSaleRebate;</div><div class="line">  <span class="function"><span class="keyword">void</span> <span class="title">promoteHolidaySale</span><span class="params">()</span> </span>&#123; ... &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Better:</span></div><div class="line"><span class="keyword">class</span> AnnualHolidaySale &#123;</div><div class="line">  <span class="keyword">int</span> <span class="number">_</span>rebate;</div><div class="line">  <span class="function"><span class="keyword">void</span> <span class="title">promote</span><span class="params">()</span> </span>&#123; ... &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="抛弃那些意义不大的信息"><a href="#抛弃那些意义不大的信息" class="headerlink" title="抛弃那些意义不大的信息"></a>抛弃那些意义不大的信息</h3><p>一个原则：试想，如果去掉这部分信息，这个命名的意义变化了吗？如果没有，果断去掉，例如声明一个变量 <code>int tempVariable;</code>,去掉variable吧！<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// bad </span></div><div class="line"><span class="keyword">class</span> WaffleObject &#123;</div><div class="line">  <span class="function"><span class="keyword">void</span> <span class="title">garnish</span><span class="params">(List&lt;Strawberry&gt; strawberries)</span> </span>&#123; ... &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">// good one</span></div><div class="line"><span class="keyword">class</span> Waffle &#123;</div><div class="line">  <span class="function"><span class="keyword">void</span> <span class="title">garnish</span><span class="params">(List&lt;Strawberry&gt; strawberries)</span> </span>&#123; ... &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;文中内容参考自Bob Nystrom的blog。&lt;a href=&quot;http://journal.stuffwithstuff.com/2016/06/16/long-names-are-long/&quot;&gt;原文链接&lt;/a&gt;&lt;br&gt;
+    
+    </summary>
+    
+      <category term="C" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/C/"/>
+    
+    
+      <category term="C 软件" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/C-%E8%BD%AF%E4%BB%B6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>升级助手上位机（使用C#编写）</title>
+    <link href="http://www.xn--4gqa63c686ta68iba.ren/2016/07/27/updateAssistant/"/>
+    <id>http://www.xn--4gqa63c686ta68iba.ren/2016/07/27/updateAssistant/</id>
+    <published>2016-07-26T16:33:21.000Z</published>
+    <updated>2016-09-14T03:07:50.866Z</updated>
+    
+    <content type="html"><![CDATA[<script src="/assets/js/APlayer.min.js"> </script><p>bootloader写完之后，使用C#写了一个配套的升级助手。不得不说C#真的是一个很优秀的语言，而<strong>visual studio</strong>也完全可以称之为最强IDE，没有之一！配合<a href="https://msdn.microsoft.com/zh-cn/dn308572.aspx" target="_blank" rel="external">MSDN</a>，花了一个星期熟悉C#,然后两周不到完成了51升级助手的开发。</p>
+<h2 id="主界面"><a href="#主界面" class="headerlink" title="主界面"></a>主界面</h2><center><img src="http://o9kzgz0kz.bkt.clouddn.com/51bootloader.jpg" alt="51升级助手"></center>
+
+<blockquote>
+<p>特点:</p>
+<ol>
+<li>支持多种不同的通信协议（主要用于升级前的握手）<ul>
+<li>用户自定义协议</li>
+<li>IEC62056-21 C模式</li>
+<li>DL/T645-07</li>
+</ul>
+</li>
+<li>配合51bootloader完成用户代码的更新<ul>
+<li>支持原生Intel HEX-80格式</li>
+<li>支持设定用户代码段地址范围</li>
+<li>支持自动重发</li>
+<li>自动剔除全0xFF数据，减少发送数据量</li>
+</ul>
+</li>
+</ol>
+<p>使用到的功能模块:<br>1.串口通信(使用C#官方serialPort类库);<br>2.文件读写(使用C#官方File类库);<br>3.设置文件(使用xml保存);<br>4.定时器(用于通信时序控制);</p>
+</blockquote>
+<h2 id="整体思路"><a href="#整体思路" class="headerlink" title="整体思路"></a>整体思路</h2><p>首先上位机升级助手打开本地<code>hex</code>文件，对hex文件进行格式化，方便后面的数据传输。然后下位机在接收到升级指令后会判断是否符合升级条件，如果符合，则跳转到<code>bootloader</code>程序中准备接收升级数据，否则忽略升级指令，并返回响应帧通知上位机。<br>在升级的过程中，双方遵循同一个校验算法，下位机校验数据通过，通过<code>IAP</code>写入<code>flash</code>，否则请求重发。<br>下位机检测到处理到用户代码段的最后一帧数据，发送升级完成指令，下位机接收校验通过，通过长跳转指令调到用户代码，完成程序升级。<br>因为下位机<code>bootloader</code>采用查询的方式通信，为了提高可靠信，及降低出错时的重传代价，一次传输的代码字节限制在16个字节，所以需要格式化<code>hex-80</code>文件<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">bool</span> <span class="title">handleHexFile</span><span class="params">(<span class="built_in">string</span> filePath)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="built_in">string</span>[] Hex=System.IO.File.ReadAllLines(filePath);</div><div class="line">    <span class="built_in">string</span>[] formatHex= System.IO.File.ReadAllLines(Application.StartupPath + <span class="string">"\\tempHexFile.txt"</span>);</div><div class="line">    uint dateAddr = <span class="number">0</span>;</div><div class="line">    uint dateLen = <span class="number">0</span>;</div><div class="line">    foreach (<span class="built_in">string</span> hexLine in Hex)</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span> (!<span class="built_in">string</span>.IsNullOrEmpty(hexLine))</div><div class="line">        &#123;</div><div class="line">            <span class="keyword">if</span> (hexLine.Substring(<span class="number">0</span>, <span class="number">1</span>) == <span class="string">":"</span>)          <span class="comment">// hex-80文件以冒号":"开头</span></div><div class="line">            &#123;</div><div class="line">                dateLen = Convert.ToUInt32(hexLine.Substring(<span class="number">1</span>,<span class="number">2</span>).Trim(),<span class="number">16</span>);</div><div class="line">                dateAddr = Convert.ToUInt32(hexLine.Substring(<span class="number">3</span>, <span class="number">4</span>).Trim(),<span class="number">16</span>);</div><div class="line">                <span class="keyword">if</span> (dateLen == <span class="number">0</span>)</div><div class="line">                &#123;</div><div class="line">                    <span class="keyword">continue</span>;</div><div class="line">                &#125;</div><div class="line">                uint modLine = dateAddr / <span class="number">16</span>;</div><div class="line">                uint modByte = dateAddr % <span class="number">16</span> + <span class="number">1</span>;</div><div class="line">                uint modLen = dateLen;</div><div class="line">                <span class="built_in">string</span>[] tempStr=null;</div><div class="line">                tempStr = formatHex[modLine].Trim().Split(<span class="string">' '</span>);</div><div class="line">                </div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; modLen*<span class="number">2</span>; i+=<span class="number">2</span>)</div><div class="line">                &#123;</div><div class="line">                    tempStr[modByte] = hexLine.Substring(<span class="number">9</span> + i, <span class="number">2</span>).Trim();</div><div class="line">                    <span class="keyword">if</span> (modByte&gt;=<span class="number">16</span>)</div><div class="line">                    &#123;</div><div class="line">                        <span class="built_in">string</span> temp = null;</div><div class="line">                        <span class="keyword">for</span> (<span class="keyword">int</span> n = <span class="number">0</span>; n &lt; tempStr.Length; n++)</div><div class="line">                        &#123;</div><div class="line">                            temp += (tempStr[n].TrimStart() + <span class="string">' '</span>);</div><div class="line">                        &#125;</div><div class="line">                        formatHex[modLine] = temp;</div><div class="line">                       </div><div class="line">                        modByte = <span class="number">0</span>;</div><div class="line">                        modLine++;</div><div class="line">                        tempStr = formatHex[modLine].Trim().Split(<span class="string">' '</span>);</div><div class="line">                    &#125;</div><div class="line">                    modByte++;</div><div class="line">                &#125;</div><div class="line">                <span class="built_in">string</span> temp2 = null;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> n = <span class="number">0</span>; n &lt; tempStr.Length; n++)</div><div class="line">                &#123;</div><div class="line">                    temp2 += (tempStr[n].TrimStart() + <span class="string">' '</span>);</div><div class="line">                &#125;</div><div class="line">                formatHex[modLine] = temp2;</div><div class="line"></div><div class="line">            &#125;</div><div class="line">            <span class="keyword">else</span></div><div class="line">            &#123;</div><div class="line">                tbInformation.AppendText(<span class="string">"empty"</span>);</div><div class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;    </div><div class="line">    &#125;</div><div class="line">    updateFile = formatHex;</div><div class="line">    System.IO.File.WriteAllLines(Application.StartupPath + <span class="string">"\\HexFile.txt"</span>, formatHex);</div><div class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>除此之外，根据通信协议完成通讯部分的代码设计，一个可用的升级助手基本完成。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;script src=&quot;/assets/js/APlayer.min.js&quot;&gt; &lt;/script&gt;&lt;p&gt;bootloader写完之后，使用C#写了一个配套的升级助手。不得不说C#真的是一个很优秀的语言，而&lt;strong&gt;visual studio&lt;/strong&gt;也完全可以称之
+    
+    </summary>
+    
+      <category term="C#" scheme="http://www.xn--4gqa63c686ta68iba.ren/categories/C/"/>
+    
+    
+      <category term="C# 上位机 串口" scheme="http://www.xn--4gqa63c686ta68iba.ren/tags/C-%E4%B8%8A%E4%BD%8D%E6%9C%BA-%E4%B8%B2%E5%8F%A3/"/>
+    
+  </entry>
+  
+</feed>
